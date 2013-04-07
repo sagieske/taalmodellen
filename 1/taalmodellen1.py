@@ -33,7 +33,7 @@ def readfile(filename):
 	
 def create_ngrams(n):
 	"""
-	Create ngrams, parameter = number of ngrams
+	Create ngrams, parameter = length of word sequences
 	"""
 
 	for i in range(0, len(unigram)-n):
