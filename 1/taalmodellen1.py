@@ -1,3 +1,10 @@
+"""
+Assignment 1
+Eszter Fodor (5873320), Sharon Gieske (6167667) & Jeroen Rooijmans
+
+To run code: python taalmodellen1.py austen.txt n m
+"""
+
 import sys
 import struct
 import random
