@@ -66,7 +66,7 @@ def get_sum():
 	Print out sum of all frequences
 	"""
 	sum_ngrams = sum(ngram_dict.values())
-	print sum_ngrams
+	print sum_ngrams 
 			
 
 def main(argv):
@@ -86,7 +86,7 @@ def main(argv):
 	print_sorted(int(argv[3]))
 	# print sum of frequences
 	get_sum()
-
+	
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
