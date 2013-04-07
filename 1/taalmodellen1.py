@@ -65,7 +65,7 @@ def get_sum():
 def main(argv):
 	"""
 	Program entry point.
-	Arguments: filename, number for ngram, number of frequent sentences
+	Arguments: filename, number for ngram, number of frequent sequences
 	"""
 
 	if len(argv) == 4:
