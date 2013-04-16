@@ -45,6 +45,7 @@ def create_ngrams(seq, n):
 	"""
 	Create ngrams
 	Parameters = sequence of words ([str]), length of ngram (int)
+	Returns = dictionary of ngrams with frequency
 	"""
 	dict = {}
 	# start at range n-1 due to prepended start symbol. otherwise multiple START symbols will be prepended.
@@ -61,6 +62,7 @@ def getWordSequence(sentences):
 	"""
 	Get sequencies with start and stop symbols
 	Argument: corpus of sentences/paragraphs
+	Return: sequence array with start and stop symbols
 	"""
 	seq = []
 	for sentence in sentences:
@@ -69,6 +71,7 @@ def getWordSequence(sentences):
 			seq.append('START')
 			seq.extend(sentence.split())
 			seq.append('STOP')
+
 	return seq
 	
 	
@@ -76,39 +79,41 @@ def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
 	"""
 	Calculates probability of last word of sentence given previous words.
 	Ignores lines containing sequences of length other than n
+
 	Parameters: Sentences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
+	Returns: dictionary of sentences and their probability 
 	"""
+	dict_p = {}
 	for sentence in sentences:
 		# ignore lines containing sequences of length other than n
-		if (sentence != "" and len(sentence.split()) == n):
-			seq = sentence.split()
+		if (len(sentence.split()) == n):
+			p = 0
+			if (sentence != ""):
+				seq = sentence.split()
+				ngramtuple = createTuple(seq,len(seq)-1,n)
+				n_1gramtuple = createTuple(seq,len(seq)-2,n-1)
+				# calculate probability
+				if ((ngramtuple in ngram) and (n_1gramtuple in n_1gram)):
+					p = float(ngram[ngramtuple]) / n_1gram[n_1gramtuple]
 
-			ngramtuple = createTuple(seq,len(seq)-1,n)
-			n_1gramtuple = createTuple(seq,len(seq)-2,n-1)
-			# calculate probability
-			if ((ngramtuple in ngram) and (n_1gramtuple in n_1gram)):
-				print ngramtuple
-				print n_1gramtuple
-				p = float(ngram[ngramtuple]) / n_1gram[n_1gramtuple]
-			else:
-				p = 0
-
-	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
+			# add sentence and probability to dictionary
+			dict_p[sentence] = p
+	return dict_p
 
 def calculateSentenceProbs(sentences, n, n_1gram, ngram):
 	"""
 	Calculate probability of sentences using function calculateSentenceProb
 	Parameters: Sentences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
 	"""
+	dict_p = {}
 	for sentence in sentences:
 		if sentence != "":
 			# Split sentence into words
 			seq = sentence.split()
-
 			# calculate probability of sentence
 			p = calculateSentenceProb(seq, n, n_1gram, ngram)
-			if p > 0:
-				print "P(%s) = %s " % ( seq, p )
+			dict_p[sentence] = p
+	return dict_p
 
 def calculateSentenceProb(seq, n, n_1gram, ngram):
 	"""
@@ -124,7 +129,8 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 		# only calculate probability if tuples are in ngram and n_1gram else probability = 0
 		if ((createTuple(seq,i,n) in ngram) and (createTuple(seq,i-1,n-1) in n_1gram)):
 			p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
-		else:
+
+		else:	# propability will be zero: break
 			return 0
 	return p
 	
@@ -143,9 +149,9 @@ def permutate(setOfWords, ngram, n_1gram):
 		for word in tuples:
 			sentence += str(word) + ' '
 		sent.append(sentence)
-
 	#for sentence in sent:
-	calculateSentenceProbs(sent, 2, n_1gram, ngram)
+	probabilities = calculateSentenceProbs(sent, 2, n_1gram, ngram)
+	return probabilities
 	#	print "P(%s) = %s " % ( sentence, p )
 	
 
@@ -202,7 +208,11 @@ def main(argv):
 
 		# Calculate conditional probabilities
 		print "= conditional probabilities ="
-		calculateConditionalProbs(ex1_sentences,n, n_1gram, ngram)
+		probs = calculateConditionalProbs(ex1_sentences,n, n_1gram, ngram)
+		for sentence, p in probs.iteritems():
+			seq = sentence.split()
+			if seq != []:
+				print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)		
 		print "\n"
 
 		# Load example2 file
@@ -210,13 +220,29 @@ def main(argv):
 
 		# Calculate sentence probabilities
 		print "= sentence probabilities ="
-		calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
+		sentence_prob = calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
+		for sentence, p in sentence_prob.iteritems():
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
 		print '\n'
 		
 		# Print permutations
 		print "= permutations ="
-		permutate(b, ngram, n_1gram)
-		permutate(a, ngram, n_1gram)
+		dict_b = permutate(b, ngram, n_1gram)
+		dict_a = permutate(a, ngram, n_1gram)
+
+		(highest,total) = getMHighest(dict_b,2)
+		print "-- 2 most frequent occurance B --"
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
+		
+		(highest,total) = getMHighest(dict_a,2)
+		print "-- 2 most frequent occurance A --"
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
+
 		
 			
 	# Else error	
