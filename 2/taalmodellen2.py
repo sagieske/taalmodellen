@@ -114,7 +114,11 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 	p = 1.0
 	# calculate probability 
 	for i in range(len(seq)):
-		p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
+		# only calculate probability if tuples are in ngram and n_1gram
+		if ((createTuple(seq,i,n) in ngram) and (createTuple(seq,i-1,n-1) in n_1gram)):
+			p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
+		else: # TODO: Is this correct? Return 0 if encounter tuple not in learning corpus? Or no multiplication and continue?
+			return 0
 	return p
 	
 def permutations(setOfWords):
