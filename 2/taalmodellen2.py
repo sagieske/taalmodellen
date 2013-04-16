@@ -24,7 +24,7 @@ def readfile(filename):
 	"""
 
 	f = open(filename, "r+")
-	fNew = detectEmptyLine(f)
+	#fNew = detectEmptyLine(f)
 
 	# Create unigram list
 	for line in f.readlines():
@@ -34,31 +34,36 @@ def readfile(filename):
 	
 def detectEmptyLine(f):
 	
+	f = open(f, "r+")
 	f2 = open('austen2.txt', 'r+')
 	
 	for line in f:
 		if line == '\n':
 			line = '</s>' + '<s>'
 		f2.write(line)
+	f.close()
+	f2.close()
 			
 	
 def create_ngrams(n):
 	"""
 	Create ngrams, parameter = length of word sequences
 	"""
-
 	for i in range(0, len(unigram)-n):
+		if i == 0:
+			print unigram
 		# create ngram tuple
 		tuple_ngram = ()
 		for j in xrange(n):
 			tuple_ngram += (unigram[i+j],)
+		# TODO: unigrams: '</s><s>It'
 
 		# ngram already in dictionary
 		if (tuple_ngram in ngram_dict):
 			ngram_dict[tuple_ngram] += 1;
 		# new ngram
 		else:
-			ngram_dict[tuple_ngram] = 1;
+			ngram_dict[tuple_ngram] = 1;		
 
 def print_sorted(m):
 	"""
@@ -87,12 +92,16 @@ def main(argv):
 	"""
 
 	if len(argv) == 4:
-		readfile(argv[1])
+		detectEmptyLine(argv[1])
+		readfile('austen2.txt')
 	else:
 		print "Error: Incorrect arguments"
 
 	# get ngrams
-	create_ngrams(int(argv[2]))
+	n = int(argv[2])
+	if n > 1:
+		create_ngrams(int(argv[2]))
+		create_ngrams(n-1)
 	# print frequences
 	print_sorted(int(argv[3]))
 	# print sum of frequences
