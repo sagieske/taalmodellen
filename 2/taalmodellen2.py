@@ -56,6 +56,27 @@ def getWordSequence(sentences):
 			seq.append('STOP')
 	return seq
 	
+	
+def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
+	for sentence in sentences:
+		if sentence != "":
+			seq = sentence.split()
+			p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq, len(seq)-2, n-1)]
+	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
+
+def calculateSentenceProbs(sentences, n, n_1gram, ngram):
+	for sentence in sentences:
+		if sentence != "":
+			seq = sentence.split()
+			p = calculateSentenceProb(seq, n, n_1gram, ngram)
+			print "P(%s) = %s " % ( seq, p )
+
+def calculateSentenceProb(seq, n, n_1gram, ngram):
+	p = 0.0
+	for i in range(len(seq)):
+		p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
+	return p
+	
 
 """
 Get the m most highest frequencies
@@ -67,6 +88,7 @@ def getMHighest(dict, m):
 		total += value
 		freqs.append((key,value))
 	return (freqs[:m],total)
+	
 	
 			
 """
@@ -104,6 +126,21 @@ def main(argv):
 			print high,freq
 		print "\n"
 		
+		# Load example1 file
+		ex1_sentences = loadFile(argv[3], '\n')
+
+		# Calculate conditional probabilities
+		print "= conditional probabilities ="
+		calculateConditionalProbs(ex1_sentences,n, n_1gram, ngram)
+		print "\n"
+
+		# Load example2 file
+		ex2_sentences = loadFile(argv[4], '\n')
+		
+		# TODO: error!?
+		print "= sentence probabilities ="
+		calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
+			
 	# Else error	
 	else:
 		print "Error: Incorrect arguments"
