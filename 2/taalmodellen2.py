@@ -14,20 +14,22 @@ import re
 import operator
 from operator import itemgetter
 
-"""
-Load corpus
-"""
+
 def loadFile(filename,split):
+	"""
+	Load corpus
+	"""
 	file = open(filename,'r')
 	buffer = file.read()
 	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
 	return filtered_buffer.split(split)
 
 
-"""
-Add start symbol
-"""	
+
 def createTuple(list,index,n):
+	"""
+	Add start symbol
+	"""	
 	z = tuple(list[max(index-n+1,0):index+1])
 	return ('START',)*(n-len(z)) + z		
 	
@@ -45,10 +47,11 @@ def create_ngrams(seq, n):
 			dict[t] = 1
 	return dict
 	
-"""
-Get sequencies
-"""
+
 def getWordSequence(sentences):
+	"""
+	Get sequencies
+	"""
 	seq = []
 	for sentence in sentences:
 		if sentence != "":
@@ -78,10 +81,10 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 	return p
 	
 
-"""
-Get the m most highest frequencies
-"""
 def getMHighest(dict, m):
+	"""
+	Get the m most highest frequencies
+	"""
 	freqs = []
 	total = 0
 	for (key,value) in sorted(dict.items(),key=itemgetter(1),reverse=True):
@@ -91,12 +94,12 @@ def getMHighest(dict, m):
 	
 	
 			
-"""
-Program entry point.
-Arguments: filename, number for ngram, corpus, additional file 1, additional file 2
-"""
+
 def main(argv):
-	
+	"""
+	Program entry point.
+	Arguments: filename, number for ngram, corpus, additional file 1, additional file 2
+	"""
 	# If correct amount of arguments calculate ngrams etc.
 	if len(argv) == 5:
 		n = int(argv[1])
