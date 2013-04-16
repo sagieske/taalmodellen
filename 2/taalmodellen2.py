@@ -39,13 +39,17 @@ def createTuple(list,index,n):
 	return ('START',)*(n-len(z)) + z		
 	
 	
-"""
-Create ngrams, parameter = length of word sequences
-"""
+
 def create_ngrams(seq, n):
+	"""
+	Create ngrams
+	Parameters = sequence of words ([str]), length of ngram (int)
+	"""
 	dict = {}
-	for i in range(-1,len(seq)):
+	# start at range 1 due to prepended start symbol
+	for i in range(1,len(seq)):
 		t = createTuple(seq, i, n)
+		# add tuple to dict or increment counter
 		if t in dict:
 			dict[t] += 1
 		else:
