@@ -87,12 +87,26 @@ def main(argv):
 		
 		# get ngrams
 		ngram = create_ngrams(corpus_seq, n)
+		if n > 1:
+			n_1gram = create_ngrams(corpus_seq,(n-1))
+		else:
+			n_1gram = {}
+			
+		# Calculate and print 10 most frequent (n-1)-grams
+		(highest,total) = getMHighest(n_1gram,10)
+		print "= 10 most frequent (%d-1)-grams =" % n
+		for (high,freq) in highest:
+			print high,freq
+		print "\n"
 		
+		# Calculate and print 10 most frequent ngrams
 		(highest,total) = getMHighest(ngram,10)
 		print "= 10 most frequent %d-grams =" % n
 		for (high,freq) in highest:
 			print high,freq
 		print "\n"
+		
+	# Else error	
 	else:
 		print "Error: Incorrect arguments"
 
