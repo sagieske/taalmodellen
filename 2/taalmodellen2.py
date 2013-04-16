@@ -14,16 +14,28 @@ import re
 import operator
 from operator import itemgetter
 
+"""
+Load corpus
+"""
+def loadFile(filename,split):
+	file = open(filename,'r')
+	buffer = file.read()
+	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
+	return filtered_buffer.split(split)
 
-	
+
+"""
+Add start symbol
+"""	
 def createTuple(list,index,n):
 	z = tuple(list[max(index-n+1,0):index+1])
 	return ('START',)*(n-len(z)) + z		
 	
+	
+"""
+Create ngrams, parameter = length of word sequences
+"""
 def create_ngrams(seq, n):
-	"""
-	Create ngrams, parameter = length of word sequences
-	"""
 	dict = {}
 	for i in range(-1,len(seq)):
 		t = createTuple(seq, i, n)
@@ -33,7 +45,9 @@ def create_ngrams(seq, n):
 			dict[t] = 1
 	return dict
 	
-	
+"""
+Get sequencies
+"""
 def getWordSequence(sentences):
 	seq = []
 	for sentence in sentences:
@@ -42,20 +56,31 @@ def getWordSequence(sentences):
 			seq.append('STOP')
 	return seq
 	
-
-def print_sorted(m):
-	"""
-	Print most frequent ngrams and value, parameter = number of frequent sequences
-	"""
-	for i in sorted(ngram_dict, key=ngram_dict.get, reverse=True):
-		# number of prefered frequent sequences showed, then break
-		if m <= 0:
-			break;
-		else:
-			print("%d: %s" % (ngram_dict[i], i))
-			m = m -1
-
 	
+def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
+	for sentence in sentences:
+		if sentence != "":
+			seq = sentence.split()
+			p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq, len(seq)-2, n-1)]
+	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
+
+def calculateSentenceProbs(sentences, n, n_1gram, ngram):
+	for sentence in sentences:
+		if sentence != "":
+			seq = sentence.split()
+			p = calculateSentenceProb(seq, n, n_1gram, ngram)
+			print "P(%s) = %s " % ( seq, p )
+
+def calculateSentenceProb(seq, n, n_1gram, ngram):
+	p = 0.0
+	for i in range(len(seq)):
+		p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
+	return p
+	
+
+"""
+Get the m most highest frequencies
+"""
 def getMHighest(dict, m):
 	freqs = []
 	total = 0
@@ -65,19 +90,14 @@ def getMHighest(dict, m):
 	return (freqs[:m],total)
 	
 	
-def loadFile(filename,split):
-	file = open(filename,'r')
-	buffer = file.read()
-	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
-	return filtered_buffer.split(split)
 			
-
+"""
+Program entry point.
+Arguments: filename, number for ngram, corpus, additional file 1, additional file 2
+"""
 def main(argv):
-	"""
-	Program entry point.
-	Arguments: filename, number for ngram, number of frequent sequences
-	"""
-
+	
+	# If correct amount of arguments calculate ngrams etc.
 	if len(argv) == 5:
 		n = int(argv[1])
 		
@@ -106,12 +126,25 @@ def main(argv):
 			print high,freq
 		print "\n"
 		
+		# Load example1 file
+		ex1_sentences = loadFile(argv[3], '\n')
+
+		# Calculate conditional probabilities
+		print "= conditional probabilities ="
+		calculateConditionalProbs(ex1_sentences,n, n_1gram, ngram)
+		print "\n"
+
+		# Load example2 file
+		ex2_sentences = loadFile(argv[4], '\n')
+		
+		# TODO: error!?
+		print "= sentence probabilities ="
+		calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
+			
 	# Else error	
 	else:
 		print "Error: Incorrect arguments"
 
-	
-	
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
