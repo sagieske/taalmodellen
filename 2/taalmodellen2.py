@@ -15,11 +15,16 @@ from operator import itemgetter
 
 def loadFile(filename,split):
 	"""
-	Load corpus
+	Load corpus and split text with parameter split.
+	Arguments: filename (string), split (string)
 	"""
 	file = open(filename,'r')
 	buffer = file.read()
+
+	# substitute all large white areas to one white line
 	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
+	
+	# split substituted text by given splitparameter
 	return filtered_buffer.split(split)
 
 
@@ -32,27 +37,33 @@ def createTuple(list,index,n):
 	return ('START',)*(n-len(z)) + z		
 	
 	
-"""
-Create ngrams, parameter = length of word sequences
-"""
+
 def create_ngrams(seq, n):
+	"""
+	Create ngrams
+	Parameters = sequence of words ([str]), length of ngram (int)
+	"""
 	dict = {}
-	for i in range(-1,len(seq)):
+	# start at range 1 due to prepended start symbol
+	for i in range(1,len(seq)):
 		t = createTuple(seq, i, n)
+		# add tuple to dict or increment counter
 		if t in dict:
 			dict[t] += 1
 		else:
 			dict[t] = 1
 	return dict
 	
-
 def getWordSequence(sentences):
 	"""
-	Get sequencies
+	Get sequencies with start and stop symbols
+	Argument: corpus of sentences/paragraphs
 	"""
 	seq = []
 	for sentence in sentences:
+		# if not end ("") add start/stop symbol to sentence
 		if sentence != "":
+			seq.append('START')
 			seq.extend(sentence.split())
 			seq.append('STOP')
 	return seq
