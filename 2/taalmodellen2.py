@@ -17,11 +17,16 @@ from operator import itemgetter
 
 def loadFile(filename,split):
 	"""
-	Load corpus
+	Load corpus and split text with parameter split.
+	Arguments: filename (string), split (string)
 	"""
 	file = open(filename,'r')
 	buffer = file.read()
+
+	# substitute all large white areas to one white line
 	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
+	
+	# split substituted text by given splitparameter
 	return filtered_buffer.split(split)
 
 
