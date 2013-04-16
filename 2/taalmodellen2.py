@@ -138,7 +138,7 @@ def permutate(setOfWords, ngram, n_1gram):
 	sent = []
 	for tuples in perm:
 		tuples = ('START', ) + tuples + ('STOP', )
-		sent.append(tuples)
+		sent.append(list(tuples))
 
 	for sentence in sent:
 		p = calculateSentenceProb(sentence, 2, n_1gram, ngram)
