@@ -6,8 +6,6 @@ To run code: python taalmodellen2.py n austen.txt ngrams.txt sentences.txt
 """
 
 import sys
-import struct
-import random
 import time
 import math
 import re
