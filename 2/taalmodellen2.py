@@ -123,10 +123,10 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 	p = 1.0
 	# calculate probability 
 	for i in range(len(seq)):
-		# only calculate probability if tuples are in ngram and n_1gram
+		# only calculate probability if tuples are in ngram and n_1gram else probability = 0
 		if ((createTuple(seq,i,n) in ngram) and (createTuple(seq,i-1,n-1) in n_1gram)):
 			p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
-		else: # TODO: Is this correct? Return 0 if encounter tuple not in learning corpus? Or no multiplication and continue?
+		else:
 			return 0
 	return p
 	
@@ -190,7 +190,7 @@ def main(argv):
 		# Load example2 file
 		ex2_sentences = loadFile(argv[4], '\n')
 		
-		# TODO: error!?
+		# Calculate sentence probabilities
 		print "= sentence probabilities ="
 		calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
 			
