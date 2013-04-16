@@ -82,12 +82,14 @@ def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
 		if (sentence != "" and len(sentence.split()) == n):
 			seq = sentence.split()
 
-			print createTuple(seq,len(seq)-1,n)
-			print createTuple(seq,len(seq)-1,n-1)
+			ngramtuple = createTuple(seq,len(seq)-1,n)
+			n_1gramtuple = createTuple(seq,len(seq)-2,n-1)
 			# calculate probability
-			if ((createTuple(seq,len(seq)-1,n) in ngram) and (createTuple(seq,len(seq)-1,n-1) in n_1gram)):
+			if ((ngramtuple in ngram) and (n_1gramtuple in n_1gram)):
 				print "KNOWN"
-				p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq,len(seq)-1,n-1)]
+				print ngramtuple
+				print n_1gramtuple
+				p = float(ngram[ngramtuple]) / n_1gram[n_1gramtuple]
 			else:
 				p = 0
 
