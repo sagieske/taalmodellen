@@ -127,9 +127,10 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 	# calculate probability 
 	for i in range(len(seq)):
 		# only calculate probability if tuples are in ngram and n_1gram else probability = 0
-		if ((createTuple(seq,i,n) in ngram) and (createTuple(seq,i-1,n-1) in n_1gram)):
+		if(n > 2 and i <2):
+			continue
+		elif ((createTuple(seq,i,n) in ngram) and (createTuple(seq,i-1,n-1) in n_1gram)):
 			p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
-
 		else:	# propability will be zero: break
 			return 0
 	return p
@@ -188,21 +189,21 @@ def main(argv):
 			n_1gram = create_ngrams(corpus_seq,(n-1))
 		else:
 			n_1gram = {}
-			
+
 		# Calculate and print 10 most frequent (n-1)-grams
 		(highest,total) = getMHighest(n_1gram,10)
 		print "= 10 most frequent (%d-1)-grams =" % n
 		for (high,freq) in highest:
-			print high,freq
+			print str(high) + ": " + str(freq)
 		print "\n"
 		
 		# Calculate and print 10 most frequent ngrams
 		(highest,total) = getMHighest(ngram,10)
 		print "= 10 most frequent %d-grams =" % n
 		for (high,freq) in highest:
-			print high,freq
+			print str(high) + ": " + str(freq)
 		print "\n"
-		
+
 		# Load example1 file
 		ex1_sentences = loadFile(argv[3], '\n')
 
@@ -225,24 +226,25 @@ def main(argv):
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
 		print '\n'
-		
+
 		# Print permutations
 		print "= permutations ="
-		# create ngrams for permutations:		
+		# create ngrams for permutations (n=2):		
 		ngram_perm = create_ngrams(corpus_seq, 2)
 		n_1gram_perm = create_ngrams(corpus_seq, 1)
 		
 		dict_b = permutate(b, ngram_perm, n_1gram_perm)
 		dict_a = permutate(a, ngram_perm, n_1gram_perm)
 
+		# Get 2 highest frequency occurance for perm of list A & B
 		(highest,total) = getMHighest(dict_b,2)
-		print "-- 2 most frequent occurance B --"
+		print "-- 2 most frequent occurance of list B --"
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
 		
 		(highest,total) = getMHighest(dict_a,2)
-		print "-- 2 most frequent occurance A --"
+		print "-- 2 most frequent occurance of list A --"
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
