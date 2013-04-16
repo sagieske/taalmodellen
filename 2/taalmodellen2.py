@@ -141,7 +141,6 @@ def permutate(setOfWords, ngram, n_1gram):
 		sent.append(tuples)
 
 	for sentence in sent:
-		# calculate probability of sentence
 		p = calculateSentenceProb(sentence, 2, n_1gram, ngram)
 		print "P(%s) = %s " % ( sentence, p )
 	
