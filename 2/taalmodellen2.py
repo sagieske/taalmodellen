@@ -14,16 +14,28 @@ import re
 import operator
 from operator import itemgetter
 
+"""
+Load corpus
+"""
+def loadFile(filename,split):
+	file = open(filename,'r')
+	buffer = file.read()
+	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
+	return filtered_buffer.split(split)
 
-	
+
+"""
+Add start symbol
+"""	
 def createTuple(list,index,n):
 	z = tuple(list[max(index-n+1,0):index+1])
 	return ('START',)*(n-len(z)) + z		
 	
+	
+"""
+Create ngrams, parameter = length of word sequences
+"""
 def create_ngrams(seq, n):
-	"""
-	Create ngrams, parameter = length of word sequences
-	"""
 	dict = {}
 	for i in range(-1,len(seq)):
 		t = createTuple(seq, i, n)
@@ -33,7 +45,9 @@ def create_ngrams(seq, n):
 			dict[t] = 1
 	return dict
 	
-	
+"""
+Get sequencies
+"""
 def getWordSequence(sentences):
 	seq = []
 	for sentence in sentences:
@@ -43,19 +57,9 @@ def getWordSequence(sentences):
 	return seq
 	
 
-def print_sorted(m):
-	"""
-	Print most frequent ngrams and value, parameter = number of frequent sequences
-	"""
-	for i in sorted(ngram_dict, key=ngram_dict.get, reverse=True):
-		# number of prefered frequent sequences showed, then break
-		if m <= 0:
-			break;
-		else:
-			print("%d: %s" % (ngram_dict[i], i))
-			m = m -1
-
-	
+"""
+Get the m most highest frequencies
+"""
 def getMHighest(dict, m):
 	freqs = []
 	total = 0
@@ -64,20 +68,14 @@ def getMHighest(dict, m):
 		freqs.append((key,value))
 	return (freqs[:m],total)
 	
-	
-def loadFile(filename,split):
-	file = open(filename,'r')
-	buffer = file.read()
-	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
-	return filtered_buffer.split(split)
 			
-
+"""
+Program entry point.
+Arguments: filename, number for ngram, corpus, additional file 1, additional file 2
+"""
 def main(argv):
-	"""
-	Program entry point.
-	Arguments: filename, number for ngram, number of frequent sequences
-	"""
-
+	
+	# If correct amount of arguments calculate ngrams etc.
 	if len(argv) == 5:
 		n = int(argv[1])
 		
@@ -110,8 +108,6 @@ def main(argv):
 	else:
 		print "Error: Incorrect arguments"
 
-	
-	
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
