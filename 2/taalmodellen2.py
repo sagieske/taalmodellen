@@ -88,8 +88,7 @@ def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
 			print createTuple(seq,len(seq)-1,n-1)
 			# calculate probability
 			if ((createTuple(seq,len(seq)-1,n) in ngram) and (createTuple(seq,len(seq)-1,n-1) in n_1gram)):
-				print createTuple(seq,len(seq)-1,n)
-				print createTuple(seq,len(seq)-1,n)
+				print "KNOWN"
 				p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq,len(seq)-1,n-1)]
 			else:
 				p = 0
