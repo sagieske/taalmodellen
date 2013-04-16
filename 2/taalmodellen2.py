@@ -16,7 +16,6 @@ import itertools
 a = ['She', 'daughters', 'youngest', 'was', 'the', 'of', 'the', 'two']
 b = ['She', 'was', 'the', 'youngest']
 
-probs = []
 
 def loadFile(filename,split):
 	"""
@@ -110,7 +109,6 @@ def calculateSentenceProbs(sentences, n, n_1gram, ngram):
 			# calculate probability of sentence
 			p = calculateSentenceProb(seq, n, n_1gram, ngram)
 			if p > 0:
-				probs.append(p)
 				print "P(%s) = %s " % ( seq, p )
 			
 			
@@ -216,21 +214,8 @@ def main(argv):
 		
 		# Print permutations
 		print "= permutations ="
-		maxi = 0
 		permutate(a, ngram, n_1gram)
-		for i in probs:
-			if i > maxi:
-				maxi = i
-				probs.remove(i)
-		print maxi
-
 		permutate(b, ngram, n_1gram)
-		for i in probs:
-			if i > maxi:
-				maxi = i
-				probs.remove(i)
-		print maxi
-
 		
 			
 	# Else error	
