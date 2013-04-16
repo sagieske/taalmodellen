@@ -34,7 +34,7 @@ def loadFile(filename,split):
 
 def createTuple(list,index,n):
 	"""
-	Add start symbol
+	Create tuples and add start symbol
 	"""	
 	z = tuple(list[max(index-n+1,0):index+1])
 	return ('START',)*(n-len(z)) + z		
