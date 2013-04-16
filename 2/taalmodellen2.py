@@ -16,6 +16,8 @@ import itertools
 a = ['She', 'daughters', 'youngest', 'was', 'the', 'of', 'the', 'two']
 b = ['She', 'was', 'the', 'youngest']
 
+probs = []
+
 def loadFile(filename,split):
 	"""
 	Load corpus and split text with parameter split.
@@ -108,8 +110,11 @@ def calculateSentenceProbs(sentences, n, n_1gram, ngram):
 			# calculate probability of sentence
 			p = calculateSentenceProb(seq, n, n_1gram, ngram)
 			if p > 0:
+				probs.append(p)
 				print "P(%s) = %s " % ( seq, p )
-
+			
+			
+			
 def calculateSentenceProb(seq, n, n_1gram, ngram):
 	"""
 	Calculate probability of sentences
@@ -145,7 +150,6 @@ def permutate(setOfWords, ngram, n_1gram):
 		sent.append(sentence)
 
 	calculateSentenceProbs(sent, 2, n_1gram, ngram)
-
 	
 
 def getMHighest(dict, m):
@@ -159,8 +163,6 @@ def getMHighest(dict, m):
 		freqs.append((key,value))
 	return (freqs[:m],total)
 	
-	
-			
 
 def main(argv):
 	"""
@@ -214,8 +216,21 @@ def main(argv):
 		
 		# Print permutations
 		print "= permutations ="
-		permutate(b, ngram, n_1gram)
+		maxi = 0
 		permutate(a, ngram, n_1gram)
+		for i in probs:
+			if i > maxi:
+				maxi = i
+				probs.remove(i)
+		print maxi
+
+		permutate(b, ngram, n_1gram)
+		for i in probs:
+			if i > maxi:
+				maxi = i
+				probs.remove(i)
+		print maxi
+
 		
 			
 	# Else error	
