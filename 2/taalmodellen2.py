@@ -132,15 +132,18 @@ def permutate(setOfWords, ngram, n_1gram):
 	"""
 	Generate all posible permutations of the set of words and calculate their probabilities
 	Parameters = set of words, ngram, n-1gram
-	TODO
 	"""
 	perm = list(itertools.permutations(setOfWords))
 	p = 1.0
-	for i in range(len(perm)):
-		p *= float(ngram[createTuple(perm,i,2)]) / n_1gram[createTuple(perm, i-1, 1)]
-		
-		return p
+	sent = []
+	for tuples in perm:
+		tuples = ('START', ) + tuples + ('STOP', )
+		sent.append(tuples)
 
+	for sentence in sent:
+		# calculate probability of sentence
+		p = calculateSentenceProb(sentence, 2, n_1gram, ngram)
+		print "P(%s) = %s " % ( sentence, p )
 	
 
 def getMHighest(dict, m):
@@ -210,7 +213,7 @@ def main(argv):
 		# Print permutations
 		print "= permutations ="
 		p = permutate(b, ngram, n_1gram)
-		print p
+		
 			
 	# Else error	
 	else:
