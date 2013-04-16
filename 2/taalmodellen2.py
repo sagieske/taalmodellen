@@ -152,7 +152,7 @@ def permutate(setOfWords, ngram, n_1gram):
 	#for sentence in sent:
 	probabilities = calculateSentenceProbs(sent, 2, n_1gram, ngram)
 	return probabilities
-	#	print "P(%s) = %s " % ( sentence, p )
+
 	
 
 def getMHighest(dict, m):
