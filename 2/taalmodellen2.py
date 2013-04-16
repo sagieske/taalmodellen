@@ -52,14 +52,16 @@ def create_ngrams(seq, n):
 			dict[t] = 1
 	return dict
 	
-
 def getWordSequence(sentences):
 	"""
-	Get sequencies
+	Get sequencies with start and stop symbols
+	Argument: corpus of sentences/paragraphs
 	"""
 	seq = []
 	for sentence in sentences:
+		# if not end ("") add start/stop symbol to sentence
 		if sentence != "":
+			seq.append('START')
 			seq.extend(sentence.split())
 			seq.append('STOP')
 	return seq
