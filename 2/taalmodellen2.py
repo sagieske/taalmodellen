@@ -2,7 +2,7 @@
 Assignment 2
 Eszter Fodor (5873320), Sharon Gieske (6167667) & Jeroen Rooijmans
 
-To run code: python taalmodellen2.py austen.txt n m
+To run code: python taalmodellen2.py n austen.txt ngrams.txt sentences.txt
 """
 
 import sys
@@ -12,58 +12,36 @@ import time
 import math
 import re
 import operator
+from operator import itemgetter
 
-# dictionary for frequency
-ngram_dict = dict()
-# list for all words
-unigram = []
 
-def readfile(filename):
-	"""
-	Read text from file
-	"""
-
-	f = open(filename, "r+")
-	#fNew = detectEmptyLine(f)
-
-	# Create unigram list
-	for line in f.readlines():
-		for word in line.split():
-			unigram.append(word)
-	f.close()
 	
-def detectEmptyLine(f):
+def createTuple(list,index,n):
+	z = tuple(list[max(index-n+1,0):index+1])
+	return ('START',)*(n-len(z)) + z		
 	
-	f = open(f, "r+")
-	f2 = open('austen2.txt', 'r+')
-	
-	for line in f:
-		if line == '\n':
-			line = '</s>' + '<s>'
-		f2.write(line)
-	f.close()
-	f2.close()
-			
-	
-def create_ngrams(n):
+def create_ngrams(seq, n):
 	"""
 	Create ngrams, parameter = length of word sequences
 	"""
-	for i in range(0, len(unigram)-n):
-		if i == 0:
-			print unigram
-		# create ngram tuple
-		tuple_ngram = ()
-		for j in xrange(n):
-			tuple_ngram += (unigram[i+j],)
-		# TODO: unigrams: '</s><s>It'
-
-		# ngram already in dictionary
-		if (tuple_ngram in ngram_dict):
-			ngram_dict[tuple_ngram] += 1;
-		# new ngram
+	dict = {}
+	for i in range(-1,len(seq)):
+		t = createTuple(seq, i, n)
+		if t in dict:
+			dict[t] += 1
 		else:
-			ngram_dict[tuple_ngram] = 1;		
+			dict[t] = 1
+	return dict
+	
+	
+def getWordSequence(sentences):
+	seq = []
+	for sentence in sentences:
+		if sentence != "":
+			seq.extend(sentence.split())
+			seq.append('STOP')
+	return seq
+	
 
 def print_sorted(m):
 	"""
@@ -77,12 +55,21 @@ def print_sorted(m):
 			print("%d: %s" % (ngram_dict[i], i))
 			m = m -1
 
-def get_sum():
-	"""
-	Print out sum of all frequences
-	"""
-	sum_ngrams = sum(ngram_dict.values())
-	print sum_ngrams 
+	
+def getMHighest(dict, m):
+	freqs = []
+	total = 0
+	for (key,value) in sorted(dict.items(),key=itemgetter(1),reverse=True):
+		total += value
+		freqs.append((key,value))
+	return (freqs[:m],total)
+	
+	
+def loadFile(filename,split):
+	file = open(filename,'r')
+	buffer = file.read()
+	filtered_buffer = re.sub(r"\n[\n]+","\n\n",buffer)
+	return filtered_buffer.split(split)
 			
 
 def main(argv):
@@ -91,21 +78,39 @@ def main(argv):
 	Arguments: filename, number for ngram, number of frequent sequences
 	"""
 
-	if len(argv) == 4:
-		detectEmptyLine(argv[1])
-		readfile('austen2.txt')
+	if len(argv) == 5:
+		n = int(argv[1])
+		
+		# Load corpus
+		corpus = loadFile(argv[2],'\n\n')
+		corpus_seq = getWordSequence(corpus)
+		
+		# get ngrams
+		ngram = create_ngrams(corpus_seq, n)
+		if n > 1:
+			n_1gram = create_ngrams(corpus_seq,(n-1))
+		else:
+			n_1gram = {}
+			
+		# Calculate and print 10 most frequent (n-1)-grams
+		(highest,total) = getMHighest(n_1gram,10)
+		print "= 10 most frequent (%d-1)-grams =" % n
+		for (high,freq) in highest:
+			print high,freq
+		print "\n"
+		
+		# Calculate and print 10 most frequent ngrams
+		(highest,total) = getMHighest(ngram,10)
+		print "= 10 most frequent %d-grams =" % n
+		for (high,freq) in highest:
+			print high,freq
+		print "\n"
+		
+	# Else error	
 	else:
 		print "Error: Incorrect arguments"
 
-	# get ngrams
-	n = int(argv[2])
-	if n > 1:
-		create_ngrams(int(argv[2]))
-		create_ngrams(n-1)
-	# print frequences
-	print_sorted(int(argv[3]))
-	# print sum of frequences
-	get_sum()
+	
 	
 
 if __name__ == '__main__':
