@@ -72,10 +72,19 @@ def getWordSequence(sentences):
 	
 	
 def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
+	"""
+	Calculates probability of last word of sentence given previous words.
+	Ignores lines containing sequences of length other than n
+	Parameters: Sentences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
+	"""
 	for sentence in sentences:
-		if sentence != "":
+		# ignore lines containing sequences of length other than n
+		if (sentence != "" and len(sentence.split()) == n):
 			seq = sentence.split()
+
+			# calculate probability
 			p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq, len(seq)-2, n-1)]
+
 	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
 
 def calculateSentenceProbs(sentences, n, n_1gram, ngram):
