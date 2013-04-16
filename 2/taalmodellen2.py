@@ -46,9 +46,11 @@ def create_ngrams(seq, n):
 	Parameters = sequence of words ([str]), length of ngram (int)
 	"""
 	dict = {}
-	# start at range 1 due to prepended start symbol
-	for i in range(1,len(seq)):
+	# start at range n-1 due to prepended start symbol. otherwise multiple START symbols will be prepended.
+	for i in range(n-1,len(seq)):
 		t = createTuple(seq, i, n)
+		if i < 10:
+			print t
 		# add tuple to dict or increment counter
 		if t in dict:
 			dict[t] += 1
@@ -83,19 +85,36 @@ def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
 			seq = sentence.split()
 
 			# calculate probability
+			# TODO: Key errors?
 			p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq, len(seq)-2, n-1)]
 
 	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
 
 def calculateSentenceProbs(sentences, n, n_1gram, ngram):
+	"""
+	Calculate probability of sentences using function calculateSentenceProb
+	Parameters: Sentences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
+	"""
 	for sentence in sentences:
 		if sentence != "":
+			# Split sentence into words
 			seq = sentence.split()
+
+			# calculate probability of sentence
 			p = calculateSentenceProb(seq, n, n_1gram, ngram)
+
 			print "P(%s) = %s " % ( seq, p )
 
 def calculateSentenceProb(seq, n, n_1gram, ngram):
-	p = 0.0
+	"""
+	Calculate probability of sentences
+	P(w)1, .., w_m) = multiplication from i= 1 to i=m+1 of: P(w_i | w_i-n+1, ..., w_i-1)
+		with w_j = START for j<= 0 and w_m+1 = STOP
+	Parameters: Sequences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
+	"""
+	# start probability of 1 due to multiplication
+	p = 1.0
+	# calculate probability 
 	for i in range(len(seq)):
 		p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
 	return p
