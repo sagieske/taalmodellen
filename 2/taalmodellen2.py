@@ -11,7 +11,10 @@ import math
 import re
 import operator
 from operator import itemgetter
+import itertools
 
+a = ['She', 'daughters', 'youngest', 'was', 'the', 'of', 'the', 'two']
+b = ['She', 'was', 'the', 'youngest']
 
 def loadFile(filename,split):
 	"""
@@ -47,8 +50,6 @@ def create_ngrams(seq, n):
 	# start at range n-1 due to prepended start symbol. otherwise multiple START symbols will be prepended.
 	for i in range(n-1,len(seq)):
 		t = createTuple(seq, i, n)
-		if i < 10:
-			print t
 		# add tuple to dict or increment counter
 		if t in dict:
 			dict[t] += 1
@@ -128,16 +129,14 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 			return 0
 	return p
 	
-def permutations(setOfWords):
+def permutate(setOfWords):
 	"""
 	Generate all posible permutations of the set of words and calculate their probabilities
 	Parameters = set of words
 	TODO
 	"""
-	
-	prob = 0.0
-	
-	return prob
+	perm = itertools.permutations(setOfWords)
+	print list(perm) 
 	
 
 def getMHighest(dict, m):
@@ -199,9 +198,14 @@ def main(argv):
 		# Load example2 file
 		ex2_sentences = loadFile(argv[4], '\n')
 		
-		# TODO: error!?
+		# Print sentence probabilities
 		print "= sentence probabilities ="
 		calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
+		print '\n'
+		
+		# Print permutations
+		print "= permutations ="
+		permutate(b)
 			
 	# Else error	
 	else:
