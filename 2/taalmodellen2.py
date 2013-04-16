@@ -228,8 +228,12 @@ def main(argv):
 		
 		# Print permutations
 		print "= permutations ="
-		dict_b = permutate(b, ngram, n_1gram)
-		dict_a = permutate(a, ngram, n_1gram)
+		# create ngrams for permutations:		
+		ngram_perm = create_ngrams(corpus_seq, 2)
+		n_1gram_perm = create_ngrams(corpus_seq, 1)
+		
+		dict_b = permutate(b, ngram_perm, n_1gram_perm)
+		dict_a = permutate(a, ngram_perm, n_1gram_perm)
 
 		(highest,total) = getMHighest(dict_b,2)
 		print "-- 2 most frequent occurance B --"
