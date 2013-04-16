@@ -87,7 +87,6 @@ def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
 			n_1gramtuple = createTuple(seq,len(seq)-2,n-1)
 			# calculate probability
 			if ((ngramtuple in ngram) and (n_1gramtuple in n_1gram)):
-				print "KNOWN"
 				print ngramtuple
 				print n_1gramtuple
 				p = float(ngram[ngramtuple]) / n_1gram[n_1gramtuple]
@@ -135,8 +134,8 @@ def permutate(setOfWords):
 	Parameters = set of words
 	TODO
 	"""
-	perm = itertools.permutations(setOfWords)
-	print list(perm) 
+	perm = list(itertools.permutations(setOfWords))
+	return perm
 	
 
 def getMHighest(dict, m):
@@ -197,7 +196,6 @@ def main(argv):
 
 		# Load example2 file
 		ex2_sentences = loadFile(argv[4], '\n')
-		
 
 		# Calculate sentence probabilities
 		print "= sentence probabilities ="
@@ -206,7 +204,10 @@ def main(argv):
 		
 		# Print permutations
 		print "= permutations ="
-		permutate(b)
+		p = permutate(b)
+		for i in p:
+			g = getWordSequence(i)
+			print calculateSentenceProbs(g, n, n_1gram, ngram)
 			
 	# Else error	
 	else:
