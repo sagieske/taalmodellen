@@ -2,7 +2,7 @@
 Assignment 2
 Eszter Fodor (5873320), Sharon Gieske (6167667) & Jeroen Rooijmans
 
-To run code: python taalmodellen2.py austen.txt n m
+To run code: python taalmodellen2.py n austen.txt ngrams.txt sentences.txt
 """
 
 import sys
@@ -14,19 +14,6 @@ import re
 import operator
 from operator import itemgetter
 
-
-def readfile(filename):
-	"""
-	Read text from file
-	"""
-
-	f = open(filename, "r+")
-
-	# Create unigram list
-	for line in f.readlines():
-		for word in line.split():
-			unigram.append(word)
-	f.close()
 
 	
 def createTuple(list,index,n):
