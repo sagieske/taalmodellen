@@ -144,9 +144,8 @@ def permutate(setOfWords, ngram, n_1gram):
 			sentence += str(word) + ' '
 		sent.append(sentence)
 
-	#for sentence in sent:
 	calculateSentenceProbs(sent, 2, n_1gram, ngram)
-	#	print "P(%s) = %s " % ( sentence, p )
+
 	
 
 def getMHighest(dict, m):
