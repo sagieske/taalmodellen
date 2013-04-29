@@ -18,7 +18,7 @@ import itertools
 
 """
 =========== Code from Assignment 2 ============
-Permutations are deleted
+Permutations and Conditional probs for ngrams are deleted
 """
 
 
@@ -81,30 +81,6 @@ def getWordSequence(sentences):
 	return seq
 
 
-def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
-	"""
-	Calculates probability of last word of sentence given previous words.
-	Ignores lines containing sequences of length other than n
-
-	Parameters: Sentences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
-	Returns: dictionary of sentences and their probability 
-	"""
-	dict_p = {}
-	for sentence in sentences:
-		# ignore lines containing sequences of length other than n
-		if (len(sentence.split()) == n):
-			p = 0
-			if (sentence != ""):
-				seq = sentence.split()
-				ngramtuple = createTuple(seq,len(seq)-1,n)
-				n_1gramtuple = createTuple(seq,len(seq)-2,n-1)
-				# calculate probability
-				if ((ngramtuple in ngram) and (n_1gramtuple in n_1gram)):
-					p = float(ngram[ngramtuple]) / n_1gram[n_1gramtuple]
-
-			# add sentence and probability to dictionary
-			dict_p[sentence] = p
-	return dict_p
 
 def calculateSentenceProbs(sentences, n, n_1gram, ngram):
 	"""
@@ -160,7 +136,7 @@ def getMHighest(dict, m):
 def main(argv):
 	"""
 	Program entry point.
-	Arguments: filename, number for ngram, corpus, additional file 1, additional file 2
+	Arguments: filename, number for ngram, corpus, test file
 	"""
 	# If correct amount of arguments calculate ngrams etc.
 	if len(argv) == 4:
