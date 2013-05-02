@@ -16,19 +16,6 @@ from collections import Counter
 
 
 
-def addOne(train,test, log):
-	probs = {}
-	bigram = create_ngrams(train,2)
-	unigram = create_ngrams(train,1)
-	unigram[("START",)] = len(train)
-	#probs = {}
-	for sentence in test:
-		seq = sentence.split()
-		probs[sentence] = calculateSentenceProb(seq,2,unigram,bigram,"ml",0, log)
-		print "%e" % probs[sentence]
-	return probs
-
-
 
 
 
@@ -145,6 +132,7 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 		# Good-Turing smoothing	
 		if (mode == "gt"):
 			k = 5
+<<<<<<< HEAD
 			r = ngram.get(tuple_n,0)
 			values = ngram.values()
 			n1 = float(values.count(1))
@@ -170,13 +158,8 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 				
 			else:
 				# no smoothing for k > 5
-				r_star = r
+				r_star = r	
 				
-				
-				
-			
-			
-
 		# NO smoothing
 		if (mode == "normal"):
 			if (tuple_n in ngram) and (tuple_n1 in n_1gram):
