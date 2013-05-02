@@ -237,21 +237,21 @@ def main(argv):
 
 		# Calculate (NORMAL) sentence probabilities
 		print "= sentence probabilities NORMAL ="
-		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal")
+		sentence_prob_normal = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal")
 		#for sentence, p in sentence_prob.iteritems():
 		#	seq = sentence.split()
 		#	print "P(%s) = %s " % ( seq, p )
 		#print '\n' 
-		(highest,total) = getMHighest(sentence_prob,10)
+		(highest,total) = getMHighest(sentence_prob_normal,10)
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
 
 
 		# Add one smoothing
-		print "\n= sentence probabilities ADD ONE="
-		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
-		(highest,total) = getMHighest(sentence_prob,10)
+		print "= sentence probabilities ADD ONE="
+		sentence_prob_add1 = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
+		(highest,total) = getMHighest(sentence_prob_add1,10)
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
@@ -264,6 +264,15 @@ def main(argv):
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
+
+		# Good Turing smoothing
+		print "= sentence probabilities Good Turing="
+		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "gt")
+		(highest,total) = getMHighest(sentence_prob_gt,10)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
+
 
 	# Else error	
 	else:
