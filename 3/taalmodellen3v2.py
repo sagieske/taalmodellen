@@ -144,6 +144,7 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 		if (mode == "goodTuring"):
 			k = 5
 			key = ngram.get(tuple_n)
+			history = len(ngram)
 			
 			if (key == None):
 				key = 0
@@ -151,11 +152,12 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 			if (key == 0):
 				count = float(ngram.get(tuple_n,0))
 				count_plus = float(ngram.get(tuple_n, 1))
+				count_new= float(count_plus / count)
 				
-				p *= float(count_plus / count)
+				p *= float(count_plus / history)
 				
-			else:
-				print 'poep'
+			#elif (1<= key <= k):
+				
 				
 				
 				
