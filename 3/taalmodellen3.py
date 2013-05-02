@@ -5,7 +5,7 @@ import itertools
 from operator import itemgetter
 
 def main(args):
-  model = args[1]
+	model = args[1]
 
 	# Load train corpus
 	trainC = loadFile(args[2],'\n\n')
