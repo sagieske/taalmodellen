@@ -5,7 +5,7 @@ import itertools
 from operator import itemgetter
 
 def main(args):
-  debug = "--debug" in args
+	debug = "--debug" in args
 	short =  "--short" in args
 	smooth = "--no-smoothing" not in args
 
