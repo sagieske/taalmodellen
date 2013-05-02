@@ -2,7 +2,7 @@
 Assignment 3
 Eszter Fodor (5873320), Sharon Gieske (6167667) & Jeroen Rooijmans
 
-To run code: python taalmodellen3v2.py n austen.txt sentences.txt
+To run code: python taalmodellen3v2.py austen.txt 
 """
 
 import sys
@@ -13,7 +13,6 @@ import operator
 from operator import itemgetter
 import itertools
 from collections import Counter
-import time
 
 
 
