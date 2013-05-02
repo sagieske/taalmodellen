@@ -139,6 +139,26 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 			eventsize = len(n_1gram) * len(n_1gram)
 
 			p *= count / float((history + (eventsize * 1)))
+		
+		# Good-Turing smoothing	
+		if (mode == "goodTuring"):
+			k = 5
+			key = ngram.get(tuple_n)
+			
+			if (key == None):
+				key = 0
+				
+			if (key <= k):
+				count = float(ngram.get(tuple_n, key))
+				count_plus = float(ngram.get(tuple_n, (key+1)))
+				
+				p *= (key + 1) * float(count_plus / count)
+			else:
+				print 'poep'
+				
+				
+			
+			
 
 		# NO smoothing
 		if (mode == "normal"):
@@ -225,8 +245,17 @@ def main(argv):
 
 
 		# Add one smoothing
-		print "= sentence probabilities ADD ONE="
+		print "\n= sentence probabilities ADD ONE="
 		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
+		(highest,total) = getMHighest(sentence_prob,10)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
+			
+		
+		# Good Turing
+		print "\n=sentence probabilities Good-Turing="
+		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "goodTuring")
 		(highest,total) = getMHighest(sentence_prob,10)
 		for (sentence,p) in highest:
 			seq = sentence.split()
