@@ -57,12 +57,10 @@ def create_ngrams(seq, n):
 	# start at range n-1 due to prepended start symbol. otherwise multiple START symbols will be prepended.
 	for i in range(n-1,len(seq)):
 		t = createTuple(seq, i, n)
-		# add tuple to dict or increment counter
-		if t in dict:
-			dict[t] += 1
-		else:
-			dict[t] = 1
+		dict[t] = dict.get(t,0) +1
 	return dict
+
+
 
 def getWordSequence(sentences):
 	"""
@@ -82,7 +80,7 @@ def getWordSequence(sentences):
 
 
 
-def calculateSentenceProbs(sentences, n, n_1gram, ngram):
+def calculateSentenceProbs(sentences, n, n_1gram, ngram, mode):
 	"""
 	Calculate probability of sentences using function calculateSentenceProb
 	Parameters: Sentences ([str]), ngram length (int), n-1gram (dict), ngrams (dict)
@@ -93,11 +91,11 @@ def calculateSentenceProbs(sentences, n, n_1gram, ngram):
 			# Split sentence into words
 			seq = sentence.split()
 			# calculate probability of sentence
-			p = calculateSentenceProb(seq, n, n_1gram, ngram)
+			p = calculateSentenceProb(seq, n, n_1gram, ngram, mode)
 			dict_p[sentence] = p
 	return dict_p
 
-def calculateSentenceProb(seq, n, n_1gram, ngram):
+def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 	"""
 	Calculate probability of sentences
 	P(w)1, .., w_m) = multiplication from i= 1 to i=m+1 of: P(w_i | w_i-n+1, ..., w_i-1)
@@ -111,10 +109,26 @@ def calculateSentenceProb(seq, n, n_1gram, ngram):
 		# only calculate probability if tuples are in ngram and n_1gram else probability = 0
 		if(n > 2 and i <2):
 			continue
-		elif ((createTuple(seq,i,n) in ngram) and (createTuple(seq,i-1,n-1) in n_1gram)):
-			p *= float(ngram[createTuple(seq,i,n)]) / n_1gram[createTuple(seq, i-1, n-1)]
-		else:	# propability will be zero: break
-			return 0
+		# create tuples
+		tuple_n = createTuple(seq,i,n)
+		tuple_n1 =createTuple(seq,i-1,n-1)	
+		
+		# add one smoothing
+		if (mode == "add1"):
+			count = ngram.get(tuple_n,0) +1
+			# TODO: History is nog niet goed.... wat hoort dit te zijn?
+			history = n_1gram.get(tuple_n1,0)
+
+			# possible events
+			eventsize = len(n_1gram) * len(n_1gram)
+			p *= count / (history + eventsize * 1)
+
+		# NO smoothing
+		if (mode == "normal"):
+			if (tuple_n in ngram) and (tuple_n1 in n_1gram):
+				p *= float(ngram[tuple_n]) / n_1gram[tuple_n1]
+			else:	# propability will be zero: break
+				return 0
 	return p
 
 
@@ -131,21 +145,17 @@ def getMHighest(dict, m):
 	return (freqs[:m],total)
 
 
-
-
 def main(argv):
 	"""
 	Program entry point.
 	Arguments: filename, number for ngram, corpus, test file
 	"""
+
+
+	"""
 	# If correct amount of arguments calculate ngrams etc.
 	if len(argv) == 4:
 		n = int(argv[1])
-
-		# Load corpus
-		corpus = loadFile(argv[2],'\n\n')
-		corpus_seq = getWordSequence(corpus)
-
 		# get ngrams
 		ngram = create_ngrams(corpus_seq, n)
 		if n > 1:
@@ -153,21 +163,6 @@ def main(argv):
 		else:
 			n_1gram = {}
 
-		# Calculate and print 10 most frequent (n-1)-grams
-		(highest,total) = getMHighest(n_1gram,10)
-		print "= 10 most frequent (%d-1)-grams =" % n
-		for (high,freq) in highest:
-			print str(high) + ": " + str(freq)
-		print "\n"
-
-		# Calculate and print 10 most frequent ngrams
-		(highest,total) = getMHighest(ngram,10)
-		print "= 10 most frequent %d-grams =" % n
-		for (high,freq) in highest:
-			print str(high) + ": " + str(freq)
-		print "\n"
-
-		"""
 		# Load example1 file
 		ex1_sentences = loadFile(argv[3], '\n')
 
@@ -180,18 +175,43 @@ def main(argv):
 				print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)		
 		print "\n"
 		"""
-		
-		# Load example2 file
-		ex2_sentences = loadFile(argv[3], '\n')
 
-		# Calculate sentence probabilities
-		print "= sentence probabilities ="
-		sentence_prob = calculateSentenceProbs(ex2_sentences, n, n_1gram, ngram)
-		for sentence, p in sentence_prob.iteritems():
+	if len(argv) == 3:
+		# Load corpus
+		corpus = loadFile(argv[1],'\n\n')
+		corpus_seq = getWordSequence(corpus)
+
+		testcorpus = loadFile(argv[2],'\n\n')
+
+		n = 2 # bigram model
+
+		# get ngrams
+		ngram = create_ngrams(corpus_seq, n)
+		if n > 1:
+			n_1gram = create_ngrams(corpus_seq,(n-1))
+		else:
+			n_1gram = {}
+
+
+		# Calculate (NORMAL) sentence probabilities
+		print "= sentence probabilities NORMAL ="
+		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal")
+		#for sentence, p in sentence_prob.iteritems():
+		#	seq = sentence.split()
+		#	print "P(%s) = %s " % ( seq, p )
+		#print '\n' 
+		(highest,total) = getMHighest(sentence_prob,30)
+		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
-		print '\n'
 
+		# Add one smoothing
+		print "= sentence probabilities ADD ONE="
+		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
+		(highest,total) = getMHighest(sentence_prob,30)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
 
 
 
