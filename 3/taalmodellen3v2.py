@@ -12,6 +12,8 @@ import re
 import operator
 from operator import itemgetter
 import itertools
+from collections import Counter
+
 
 
 def addOne(train,test, log):
@@ -141,21 +143,34 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 			p *= count / float((history + (eventsize * 1)))
 		
 		# Good-Turing smoothing	
-		if (mode == "goodTuring"):
+		if (mode == "gt"):
 			k = 5
-			key = ngram.get(tuple_n)
-			
-			if (key == None):
-				key = 0
+			r = ngram.get(tuple_n,0)
+			values = ngram.values()
+			n1 = float(values.count(1))
+
+			p = 1
+			# use standard Good-Turing Smoothing if 
+			if (r == 0):
+				eventsize = len(n_1gram) * len(n_1gram)
+				# number of unseen events				
+				n0 = eventsize - len(ngram)
+				r_star = (r + 1) * (n1/n0)
+				#print "r=0" 
+
+			if (r > 0 and r <= k):
+				nr = float(values.count(r))
+				nr_1 = float(values.count(r+1))
+				nk_1 = float(values.count(k+1))
+				rk_formula = ( (k+1) *nk_1 ) / n1
+				r_star = ( ((r + 1) * (nr_1 / nr)) - r * rk_formula ) / (1 - rk_formula)
+				print "%f: %f" % (r, r_star)
 				
-			if (key == 0):
-				count = float(ngram.get(tuple_n,0))
-				count_plus = float(ngram.get(tuple_n, 1))
-				
-				p *= float(count_plus / count)
+				#p *= float(count_plus / count)
 				
 			else:
-				print 'poep'
+				# no smoothing for k > 5
+				r_star = r
 				
 				
 				
@@ -236,32 +251,19 @@ def main(argv):
 		# Calculate (NORMAL) sentence probabilities
 		print "= sentence probabilities NORMAL ="
 		sentence_prob_normal = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal")
-		#for sentence, p in sentence_prob.iteritems():
+		#(highest,total) = getMHighest(sentence_prob_normal,10)
+		#for (sentence,p) in highest:
 		#	seq = sentence.split()
 		#	print "P(%s) = %s " % ( seq, p )
-		#print '\n' 
-		(highest,total) = getMHighest(sentence_prob_normal,10)
-		for (sentence,p) in highest:
-			seq = sentence.split()
-			print "P(%s) = %s " % ( seq, p )
 
 
 		# Add one smoothing
 		print "= sentence probabilities ADD ONE="
 		sentence_prob_add1 = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
-		(highest,total) = getMHighest(sentence_prob_add1,10)
-		for (sentence,p) in highest:
-			seq = sentence.split()
-			print "P(%s) = %s " % ( seq, p )
-			
-		
-		# Good Turing
-		print "\n=sentence probabilities Good-Turing="
-		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "goodTuring")
-		(highest,total) = getMHighest(sentence_prob,10)
-		for (sentence,p) in highest:
-			seq = sentence.split()
-			print "P(%s) = %s " % ( seq, p )
+		#(highest,total) = getMHighest(sentence_prob_add1,10)
+		#for (sentence,p) in highest:
+		#	seq = sentence.split()
+		#	print "P(%s) = %s " % ( seq, p )
 
 		# Good Turing smoothing
 		print "= sentence probabilities Good Turing="
