@@ -1,0 +1,190 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage{fullpage}
+
+\title{Taalmodellen Assignment 3}
+\author{Eszter Fodor, Sharon Gieske \& Jeroen Rooijmans \\ 5873320, 6167667}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Output of the program:}
+\begin{enumerate}
+	\item \textit{Report the percentage of sentences which are assigned probability
+	zero by each of the models.}\\\\
+	\textbf{Without smoothing:}  \begin{verbatim}Percentage sentences with 0 probability: 1.00 
+	\end{verbatim}
+	
+	\textbf{With Add-one smoothing:} 
+	\begin{verbatim}
+		Percentage sentences with 0 probability: 0.64
+	\end{verbatim}
+	
+	\textbf{With Good-Turing smoothing:}
+	\begin{verbatim}
+		Percentage sentences with 0 probability: 0.36
+	\end{verbatim}
+	
+	\item \textit{Report the first 5 sentence in the test corpus which are assigned
+	a probability of zero by each of the models.}\\\\
+	\textbf{Without smoothing:}
+	\begin{verbatim}
+		Sentence 1 : Phoo phoo replied Charles what's an evening party Never worth 
+		remembering Your father might have asked us to dinner I think if he had wanted 
+		to see us You may do as you like but I shall go to the play
+		
+	Sentence 2 : There was a little awkwardness at first in their discourse on another 
+	subject They must speak of the accident at Lyme Lady Russell had not been arrived 
+	five minutes the day before when a full account of the whole had burst on her but 
+	still it must be talked of she must make enquiries she must regret the imprudence 
+	lament the result and Captain Wentworth's name must be mentioned by both Anne was 
+	conscious of not doing it so well as Lady Russell She could not speak the name and 
+	look straight forward to Lady Russell's eye till she had adopted the expedient of 
+	telling her briefly what she thought of the attachment between him and Louisa When 
+	this was told his name distressed her no longer
+	
+	
+	Sentence 3 : Her jealous eye was satisfied in one particular Captain Wentworth was 
+	acknowledged again by each by Elizabeth more graciously than before She even 
+	addressed him once and looked at him more than once Elizabeth was in fact revolving 
+	a great measure The sequel explained it After the waste of a few minutes in saying 
+	the proper nothings she began to give the invitation which was to comprise all the 
+	remaining dues of the Musgroves To morrow evening to meet a few friends no formal 
+	party It was all said very gracefully and the cards with which she had provided 
+	herself the Miss Elliot at home were laid on the table with a courteous comprehensive 
+	smile to all and one smile and one card more decidedly for Captain Wentworth The 
+	truth was that Elizabeth had been long enough in Bath to understand the importance 
+	of a man of such an air and appearance as his The past was nothing The present was 
+	that Captain Wentworth would move about well in her drawing room The card was 
+	pointedly given and Sir Walter and Elizabeth arose and disappeared
+	
+	Sentence 4 : You will stay I am sure you will stay and nurse her cried he turning 
+	to her and speaking with a glow and yet a gentleness which seemed almost restoring 
+	the past She coloured deeply and he recollected himself and moved away She expressed 
+	herself most willing ready happy to remain It was what she had been thinking of and 
+	wishing to be allowed to do A bed on the floor in Louisa's room would be sufficient 
+	for her if Mrs Harville would but think so
+	
+	Sentence 5 : Winthrop however or its environs for young men are sometimes to be 
+	met with strolling about near home was their destination and after another half 
+	mile of gradual ascent through large enclosures where the ploughs at work and the 
+	fresh made path spoke the farmer counteracting the sweets of poetical despondence 
+	and meaning to have spring again they gained the summit of the most considerable hill 
+	which parted Uppercross and Winthrop and soon commanded a full view of the latter at 
+	the foot of the hill on the other side
+	\end{verbatim}
+	
+	\textbf{With Add-one smoothing:}
+	\begin{verbatim}
+	Sentence 1 : There was a little awkwardness at first in their discourse on another 
+	subject They must speak of the accident at Lyme Lady Russell had not been arrived 
+	five minutes the day before when a full account of the whole had burst on her but 
+	still it must be talked of she must make enquiries she must regret the imprudence 
+	lament the result and Captain Wentworth's name must be mentioned by both Anne was 
+	conscious of not doing it so well as Lady Russell She could not speak the name and 
+	look straight forward to Lady Russell's eye till she had adopted the expedient of 
+	telling her briefly what she thought of the attachment between him and Louisa When 
+	this was told his name distressed her no longer
+	
+	Sentence 2 : Her jealous eye was satisfied in one particular Captain Wentworth was 
+	acknowledged again by each by Elizabeth more graciously than before She even 
+	addressed him once and looked at him more than once Elizabeth was in fact revolving 
+	a great measure The sequel explained it After the waste of a few minutes in saying 
+	the proper nothings she began to give the invitation which was to comprise all the 
+	remaining dues of the Musgroves To morrow evening to meet a few friends no formal 
+	party It was all said very gracefully and the cards with which she had provided 
+	herself the Miss Elliot at home were laid on the table with a courteous comprehensive 
+	smile to all and one smile and one card more decidedly for Captain Wentworth The 
+	truth was that Elizabeth had been long enough in Bath to understand the importance 
+	of a man of such an air and appearance as his The past was nothing The present was 
+	that Captain Wentworth would move about well in her drawing room The card was 
+	pointedly given and Sir Walter and Elizabeth arose and disappeared
+	
+	Sentence 3 : You will stay I am sure you will stay and nurse her cried he turning 
+	to her and speaking with a glow and yet a gentleness which seemed almost restoring 
+	the past She coloured deeply and he recollected himself and moved away She expressed 
+	herself most willing ready happy to remain It was what she had been thinking of and 
+	wishing to be allowed to do A bed on the floor in Louisa's room would be sufficient 
+	for her if Mrs Harville would but think so
+	
+	Sentence 4 : Winthrop however or its environs for young men are sometimes to be met 
+	with strolling about near home was their destination and after another half mile of 
+	gradual ascent through large enclosures where the ploughs at work and the fresh made 
+	path spoke the farmer counteracting the sweets of poetical despondence and meaning to 
+	have spring again they gained the summit of the most considerable hill which parted 
+	Uppercross and Winthrop and soon commanded a full view of the latter at the foot of 
+	the hill on the other side
+	
+	Sentence 5 : The house and grounds and furniture were approved the Crofts were approved 
+	terms time every thing and every body was right and Mr Shepherd's clerks were set to 
+	work without there having been a single preliminary difference to modify of all that 
+	This indenture sheweth
+	\end{verbatim}
+	
+	\textbf{With Good-Turing smoothing:}
+	\begin{verbatim}
+	Sentence 1 : There was a little awkwardness at first in their discourse on another 
+	subject They must speak of the accident at Lyme Lady Russell had not been arrived five 
+	minutes the day before when a full account of the whole had burst on her but still it 
+	must be talked of she must make enquiries she must regret the imprudence lament the 
+	result and Captain Wentworth's name must be mentioned by both Anne was conscious of 
+	not doing it so well as Lady Russell She could not speak the name and look straight 
+	forward to Lady Russell's eye till she had adopted the expedient of telling her briefly 
+	what she thought of the attachment between him and Louisa When this was told his name 
+	distressed her no longer
+	
+	Sentence 2 : Her jealous eye was satisfied in one particular Captain Wentworth was 
+	acknowledged again by each by Elizabeth more graciously than before She even addressed 
+	him once and looked at him more than once Elizabeth was in fact revolving a great 
+	measure The sequel explained it After the waste of a few minutes in saying the proper 
+	nothings she began to give the invitation which was to comprise all the remaining dues 
+	of the Musgroves To morrow evening to meet a few friends no formal party It was all 
+	said very gracefully and the cards with which she had provided herself the Miss Elliot 
+	at home were laid on the table with a courteous comprehensive smile to all and one smile 
+	and one card more decidedly for Captain Wentworth The truth was that Elizabeth had been 
+	long enough in Bath to understand the importance of a man of such an air and appearance 
+	as his The past was nothing The present was that Captain Wentworth would move about well 
+	in her drawing room The card was pointedly given and Sir Walter and Elizabeth arose and 
+	disappeared
+	
+	Sentence 3 : Winthrop however or its environs for young men are sometimes to be met with 
+	strolling about near home was their destination and after another half mile of gradual 
+	ascent through large enclosures where the ploughs at work and the fresh made path spoke 
+	the farmer counteracting the sweets of poetical despondence and meaning to have spring 
+	again they gained the summit of the most considerable hill which parted Uppercross and 
+	Winthrop and soon commanded a full view of the latter at the foot of the hill on the 
+	other side
+	
+	Sentence 4 : Are you serious cried Mary her eyes brightening Dear me that's a very good 
+	thought very good indeed To be sure I may just as well go as not for I am of no use at 
+	home am I and it only harasses me You who have not a mother's feelings are a great deal 
+	the properest person You can make little Charles do anything he always minds you at a 
+	word It will be a great deal better than leaving him only with Jemima Oh I shall 
+	certainly go I am sure I ought if I can quite as much as Charles for they want me 
+	excessively to be acquainted with Captain Wentworth and I know you do not mind being 
+	left alone An excellent	thought of yours indeed Anne I will go and tell Charles 
+	and get ready directly You can send for us you know at a moment's notice if 
+	anything is the matter but I dare say there will be nothing to alarm you 
+	I should not go you may be sure if I did not feel quite at ease about my dear child
+	
+	Sentence 5 : Mr Shepherd was eloquent on the subject pointing out all the circumstances 
+	of the Admiral's family which made him peculiarly desirable as a tenant He was a married 
+	man and without children the very state to be wished for A house was never taken good 
+	care of Mr Shepherd observed without a lady he did not know whether furniture might not 
+	be in danger of suffering as much where there was no lady as where there were many 
+	children A lady without a family was the very best preserver of furniture 
+	in the world He had seen Mrs Croft too she was at Taunton with the admiral 
+	and had been present almost all the time they were talking the matter over
+	\end{verbatim}
+
+	\item \textit{Explain the differences between the models.}\\
+	When using add-one smoothing, every unseen event gets the same probability assigned to. On the
+	other hand, with Good-Turing smoothing the probability for unseen events is better divided. 
+
+\end{enumerate}
+
+
+
+
+
+\end{document}
