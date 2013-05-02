@@ -59,12 +59,11 @@ def create_ngrams(seq, n):
 	"""
 	dict = {}
 	# start at range n-1 due to prepended start symbol. otherwise multiple START symbols will be prepended.
+
 	for i in range(n-1,len(seq)):
 		t = createTuple(seq, i, n)
 		dict[t] = dict.get(t,0) +1
 	return dict
-
-
 
 def getWordSequence(sentences):
 	"""
@@ -87,22 +86,26 @@ def smoothGTk(ngram, k, eventsize):
 	sNgram = {}
 	rvalues = {}
 	values = ngram.values()
+	print max(values)
 	# calculation of constant number of events
 	n1 = float(values.count(1))
-	n0 = eventsize - len(ngram)
+	print n1
+	n0 = eventsize - len(ngram)	
 	nk_1 = float(values.count(k+1))
 	denom = (((k+1)*nk_1)/n1)
-
 	# for every frequency r seen until k
-	for r in range(k+1):
+
+	for r in range(max(values)+1):
 		nr_1 = float(values.count(r+1))
 		# use standard Good-Turing Smoothing if r=0
 		if r == 0:
 			rvalues[r] = n1/n0
+		elif r > k:
+			rvalues[r] = r
 		else:
 			nr = float(values.count(r))
-			rvalues[r] = (((r+1)*(float(nr_1)/nr))-(r* denom)/ (1-denom))
-	print rvalues
+			rvalues[r] = (((r+1)*(float(nr_1)/nr))-(r* denom))/ (1-denom)
+	
 	
 	# create new bigram model with smoothed frequencies
 	for t in ngram:
@@ -294,7 +297,6 @@ def main(argv):
 		eventsize = len(n_1gram) * len(n_1gram)
 		k = 5
 		(rvalues,smoothed_bigram) = smoothGTk(ngram, k, eventsize)
-		print rvalues
 		specialunigram = calculateSpecialUniGram(smoothed_bigram)
 		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, specialunigram, smoothed_bigram, "gt", rvalues[1]/sum(rvalues.values()))
 		(highest,total) = getMHighest(sentence_prob_gt,10)
