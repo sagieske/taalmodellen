@@ -51,6 +51,7 @@ def createTuple(list,index,n):
 
 
 
+
 def create_ngrams(seq, n):
 	"""
 	Create ngrams
@@ -75,7 +76,6 @@ def getWordSequence(sentences):
 	for sentence in sentences:
 		# if not end ("") add start/stop symbol to sentence
 		if sentence != "":
-			seq.append('START')
 			seq.extend(sentence.split())
 			seq.append('STOP')
 
@@ -86,10 +86,9 @@ def smoothGTk(ngram, k, eventsize):
 	sNgram = {}
 	rvalues = {}
 	values = ngram.values()
-	print max(values)
+
 	# calculation of constant number of events
 	n1 = float(values.count(1))
-	print n1
 	n0 = eventsize - len(ngram)	
 	nk_1 = float(values.count(k+1))
 	denom = (((k+1)*nk_1)/n1)
@@ -101,7 +100,7 @@ def smoothGTk(ngram, k, eventsize):
 		if r == 0:
 			rvalues[r] = n1/n0
 		elif r > k:
-			rvalues[r] = r
+			rvalues[r] = float(values.count(r))
 		else:
 			nr = float(values.count(r))
 			rvalues[r] = (((r+1)*(float(nr_1)/nr))-(r* denom))/ (1-denom)
@@ -110,12 +109,7 @@ def smoothGTk(ngram, k, eventsize):
 	# create new bigram model with smoothed frequencies
 	for t in ngram:
 		r = ngram[t]
-
-		# no smoothing
-		if r > k:
-			sNgram[t] = r
-		else:
-			sNgram[t] = rvalues[r]
+		sNgram[t] = rvalues[r]
 
 	return (rvalues,sNgram)
 
@@ -169,27 +163,18 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode, zero_prob ):
 		# Good-Turing smoothing	
 		if (mode == "gt"):
 			# unigram dictionary
-			totalgramcounter = {}
-			p = 0
+			#totalunigramcounter = {}
+			p = 1.0
 			for i in range(len(seq)):
 				tuple_n = createTuple(seq,i,n)
 				# seen bigram
-				if (tuple_n in ngram):
-					# create unigrams
-					if(tuple_n[0] not in totalgramcounter):
-						unigramcount = 0
-						if tuple_n[0] in n_1gram:
-							unigramcount = n_1gram[tuple_n[0]]
-						if ngram[tuple_n] > 0.0:
-							# TODO: LOOK AT REMARKS 2.
-							totalgramcounter[tuple_n[0]] = float(ngram[tuple_n]) / unigramcount
-							p += totalgramcounter[tuple_n[0]]
-					# unigram already created					
-					else: 
-						p += totalgramcounter[tuple_n[0]]
+				if (tuple_n in ngram):				
+					p *= float(ngram[tuple_n])/n_1gram[tuple_n[0]]
+					#print "p: %f" % p
 				# not seen bigram 				
 				else:
-					p += zero_prob
+					#print "zero_prob: %f" % zero_prob
+					p *= zero_prob
 				
 		# NO smoothing
 		if (mode == "normal"):
@@ -230,33 +215,8 @@ def getMHighest(dict, m):
 def main(argv):
 	"""
 	Program entry point.
-	Arguments: filename, number for ngram, corpus, test file
+	Arguments: trainingcorpus filename, testcorpus filename
 	"""
-
-
-	"""
-	# If correct amount of arguments calculate ngrams etc.
-	if len(argv) == 4:
-		n = int(argv[1])
-		# get ngrams
-		ngram = create_ngrams(corpus_seq, n)
-		if n > 1:
-			n_1gram = create_ngrams(corpus_seq,(n-1))
-		else:
-			n_1gram = {}
-
-		# Load example1 file
-		ex1_sentences = loadFile(argv[3], '\n')
-
-		# Calculate conditional probabilities
-		print "= conditional probabilities ="
-		probs = calculateConditionalProbs(ex1_sentences,n, n_1gram, ngram)
-		for sentence, p in probs.iteritems():
-			seq = sentence.split()
-			if seq != []:
-				print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)		
-		print "\n"
-		"""
 
 	if len(argv) == 3:
 		# Load corpus
@@ -278,27 +238,30 @@ def main(argv):
 		# Calculate (NORMAL) sentence probabilities
 		print "= sentence probabilities NORMAL ="
 		sentence_prob_normal = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal", 0)
-		#(highest,total) = getMHighest(sentence_prob_normal,10)
-		#for (sentence,p) in highest:
-		#	seq = sentence.split()
-		#	print "P(%s) = %s " % ( seq, p )
+		(highest,total) = getMHighest(sentence_prob_normal,10)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
 
 
 		# Add one smoothing
 		print "= sentence probabilities ADD ONE="
 		sentence_prob_add1 = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1", 0)
-		#(highest,total) = getMHighest(sentence_prob_add1,10)
-		#for (sentence,p) in highest:
-		#	seq = sentence.split()
-		#	print "P(%s) = %s " % ( seq, p )
+		(highest,total) = getMHighest(sentence_prob_add1,10)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
 
 		# Good Turing smoothing
 		print "= sentence probabilities Good Turing="
 		eventsize = len(n_1gram) * len(n_1gram)
 		k = 5
+		# created smoothed bigrams
 		(rvalues,smoothed_bigram) = smoothGTk(ngram, k, eventsize)
+		# create smoothed unigrams
 		specialunigram = calculateSpecialUniGram(smoothed_bigram)
-		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, specialunigram, smoothed_bigram, "gt", rvalues[1]/sum(rvalues.values()))
+		# calculate probability
+		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, specialunigram, smoothed_bigram, "gt", float(rvalues[1]/sum(rvalues.values())))
 		(highest,total) = getMHighest(sentence_prob_gt,10)
 		for (sentence,p) in highest:
 			seq = sentence.split()
