@@ -125,16 +125,17 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 		tuple_n = createTuple(seq,i,n)
 		tuple_n1 =createTuple(seq,i-1,n-1)	
 		
-		# add one smoothing
+		### Smoothing ###
+		# Add one smoothing
 		if (mode == "add1"):
 			count = float(ngram.get(tuple_n,0) +1)
 
-			# TODO: History is nog niet goed.... wat hoort dit te zijn?
-			history = n_1gram.get(tuple_n1,0)
+			# history is number of bigrams
+			history = len(ngram)
 
 			# possible events
 			eventsize = len(n_1gram) * len(n_1gram)
-			#print history
+
 			p *= count / float((history + (eventsize * 1)))
 
 		# NO smoothing
@@ -143,10 +144,7 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 				p *= float(ngram[tuple_n]) / n_1gram[tuple_n1]
 			else:	# propability will be zero: break
 				return 0
-	print p
-	if p == 0:
-		print mode
-		print "KUT"
+
 	return p
 
 
@@ -213,24 +211,24 @@ def main(argv):
 
 		# Calculate (NORMAL) sentence probabilities
 		print "= sentence probabilities NORMAL ="
-		#sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal")
+		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal")
 		#for sentence, p in sentence_prob.iteritems():
 		#	seq = sentence.split()
 		#	print "P(%s) = %s " % ( seq, p )
 		#print '\n' 
-		#(highest,total) = getMHighest(sentence_prob,10)
-		#for (sentence,p) in highest:
-		#	seq = sentence.split()
-		#	print "P(%s) = %s " % ( seq, p )
+		(highest,total) = getMHighest(sentence_prob,10)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
 
 
 		# Add one smoothing
 		print "= sentence probabilities ADD ONE="
 		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
 		(highest,total) = getMHighest(sentence_prob,10)
-		#for (sentence,p) in highest:
-		#	seq = sentence.split()
-		#	print "P(%s) = %s " % ( seq, p )
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
 
 	# Else error	
 	else:
