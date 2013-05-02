@@ -28,6 +28,8 @@ def addOne(train,test, log):
 
 
 
+
+
 """
 =========== Code from Assignment 2 ============
 Permutations and Conditional probs for ngrams are deleted
@@ -137,6 +139,28 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 			eventsize = len(n_1gram) * len(n_1gram)
 
 			p *= count / float((history + (eventsize * 1)))
+		
+		# Good-Turing smoothing	
+		if (mode == "goodTuring"):
+			k = 5
+			key = ngram.get(tuple_n)
+			
+			if (key == None):
+				key = 0
+				
+			if (key == 0):
+				count = float(ngram.get(tuple_n,0))
+				count_plus = float(ngram.get(tuple_n, 1))
+				
+				p *= float(count_plus / count)
+				
+			else:
+				print 'poep'
+				
+				
+				
+			
+			
 
 		# NO smoothing
 		if (mode == "normal"):
@@ -226,6 +250,15 @@ def main(argv):
 		print "= sentence probabilities ADD ONE="
 		sentence_prob_add1 = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
 		(highest,total) = getMHighest(sentence_prob_add1,10)
+		for (sentence,p) in highest:
+			seq = sentence.split()
+			print "P(%s) = %s " % ( seq, p )
+			
+		
+		# Good Turing
+		print "\n=sentence probabilities Good-Turing="
+		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "goodTuring")
+		(highest,total) = getMHighest(sentence_prob,10)
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
