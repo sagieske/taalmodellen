@@ -132,7 +132,6 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 		# Good-Turing smoothing	
 		if (mode == "gt"):
 			k = 5
-<<<<<<< HEAD
 			r = ngram.get(tuple_n,0)
 			values = ngram.values()
 			n1 = float(values.count(1))
