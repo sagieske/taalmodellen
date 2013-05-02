@@ -211,6 +211,21 @@ def getMHighest(dict, m):
 		freqs.append((key,value))
 	return (freqs[:m],total)
 
+def print_highest(nr, prob_dict):
+	(highest,total) = getMHighest(prob_dict,nr)
+	for (sentence,p) in highest:
+		seq = sentence.split()
+		print "P(%s) = %s " % ( seq, p )
+
+def print_zeros(nr,probs):
+	percent = float(probs.values().count(0.0))/len(probs)
+	print "**=====**=====**=====**=====**=====**=====**=====**"
+	print " Percentage sentences with 0 probability: %.2f" % percent
+	print "\n First 5 sentences with 0 probability"
+	i = 0
+	for s in filter(lambda x: x[1] == 0.0,probs.items())[:nr]:
+		i += 1
+		print "Sentence", i, ":", " ".join(s[0].split())
 
 def main(argv):
 	"""
@@ -238,19 +253,15 @@ def main(argv):
 		# Calculate (NORMAL) sentence probabilities
 		print "= sentence probabilities NORMAL ="
 		sentence_prob_normal = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "normal", 0)
-		(highest,total) = getMHighest(sentence_prob_normal,10)
-		for (sentence,p) in highest:
-			seq = sentence.split()
-			print "P(%s) = %s " % ( seq, p )
-
+		#print_highest(10, sentence_prob_normal)
+		print_zeros(5 ,sentence_prob_normal)
 
 		# Add one smoothing
 		print "= sentence probabilities ADD ONE="
 		sentence_prob_add1 = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1", 0)
-		(highest,total) = getMHighest(sentence_prob_add1,10)
-		for (sentence,p) in highest:
-			seq = sentence.split()
-			print "P(%s) = %s " % ( seq, p )
+		
+		#print_highest(10, sentence_prob_add1)
+		print_zeros(5 ,sentence_prob_add1)
 
 		# Good Turing smoothing
 		print "= sentence probabilities Good Turing="
@@ -261,12 +272,11 @@ def main(argv):
 		# create smoothed unigrams
 		specialunigram = calculateSpecialUniGram(smoothed_bigram)
 		# calculate probability
-		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, specialunigram, smoothed_bigram, "gt", float(rvalues[1]/sum(rvalues.values())))
-		(highest,total) = getMHighest(sentence_prob_gt,10)
-		for (sentence,p) in highest:
-			seq = sentence.split()
-			print "P(%s) = %s " % ( seq, p )
-
+		zero_probability = float(rvalues[1]/sum(rvalues.values()))
+		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, specialunigram, smoothed_bigram, "gt", zero_probability)
+		
+		# print_highest(10, sentence_prob_gt)
+		print_zeros(5 ,sentence_prob_gt)
 
 	# Else error	
 	else:
