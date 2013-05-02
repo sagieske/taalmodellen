@@ -148,13 +148,15 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode ):
 			if (key == None):
 				key = 0
 				
-			if (key <= k):
-				count = float(ngram.get(tuple_n, key))
-				count_plus = float(ngram.get(tuple_n, (key+1)))
+			if (key == 0):
+				count = float(ngram.get(tuple_n,0))
+				count_plus = float(ngram.get(tuple_n, 1))
 				
-				p *= (key + 1) * float(count_plus / count)
+				p *= float(count_plus / count)
+				
 			else:
 				print 'poep'
+				
 				
 				
 			
