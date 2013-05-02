@@ -14,6 +14,18 @@ from operator import itemgetter
 import itertools
 
 
+def addOne(train,test, log):
+	probs = {}
+	bigram = create_ngrams(train,2)
+	unigram = create_ngrams(train,1)
+	unigram[("START",)] = len(train)
+	#probs = {}
+	for sentence in test:
+		seq = sentence.split()
+		probs[sentence] = calculateSentenceProb(seq,2,unigram,bigram,"ml",0, log)
+		print "%e" % probs[sentence]
+	return probs
+
 
 
 """
@@ -205,6 +217,7 @@ def main(argv):
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
 
+
 		# Add one smoothing
 		print "= sentence probabilities ADD ONE="
 		sentence_prob = calculateSentenceProbs(testcorpus, n, n_1gram, ngram, "add1")
@@ -212,8 +225,6 @@ def main(argv):
 		for (sentence,p) in highest:
 			seq = sentence.split()
 			print "P(%s) = %s " % ( seq, p )
-
-
 
 	# Else error	
 	else:
