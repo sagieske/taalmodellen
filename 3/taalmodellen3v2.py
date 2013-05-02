@@ -87,8 +87,6 @@ def smoothGTk(ngram, k, eventsize):
 	sNgram = {}
 	rvalues = {}
 	values = ngram.values()
-	print "START"	
-	t0= time.clock()
 	# calculation of constant number of events
 	n1 = float(values.count(1))
 	n0 = eventsize - len(ngram)
@@ -115,9 +113,6 @@ def smoothGTk(ngram, k, eventsize):
 			sNgram[t] = r
 		else:
 			sNgram[t] = rvalues[r]
-	print "DONE"	
-	t= time.clock() - t0
-	print t
 
 	return (rvalues,sNgram)
 
@@ -170,7 +165,28 @@ def calculateSentenceProb(seq, n, n_1gram, ngram, mode, zero_prob ):
 
 		# Good-Turing smoothing	
 		if (mode == "gt"):
-			print "Yo"
+			# unigram dictionary
+			totalgramcounter = {}
+			p = 0
+			for i in range(len(seq)):
+				tuple_n = createTuple(seq,i,n)
+				# seen bigram
+				if (tuple_n in ngram):
+					# create unigrams
+					if(tuple_n[0] not in totalgramcounter):
+						unigramcount = 0
+						if tuple_n[0] in n_1gram:
+							unigramcount = n_1gram[tuple_n[0]]
+						if ngram[tuple_n] > 0.0:
+							# TODO: LOOK AT REMARKS 2.
+							totalgramcounter[tuple_n[0]] = float(ngram[tuple_n]) / unigramcount
+							p += totalgramcounter[tuple_n[0]]
+					# unigram already created					
+					else: 
+						p += totalgramcounter[tuple_n[0]]
+				# not seen bigram 				
+				else:
+					p += zero_prob
 
 		# NO smoothing
 		if (mode == "normal"):
@@ -278,6 +294,7 @@ def main(argv):
 		eventsize = len(n_1gram) * len(n_1gram)
 		k = 5
 		(rvalues,smoothed_bigram) = smoothGTk(ngram, k, eventsize)
+		print rvalues
 		specialunigram = calculateSpecialUniGram(smoothed_bigram)
 		sentence_prob_gt = calculateSentenceProbs(testcorpus, n, specialunigram, smoothed_bigram, "gt", rvalues[1]/sum(rvalues.values()))
 		(highest,total) = getMHighest(sentence_prob_gt,10)
