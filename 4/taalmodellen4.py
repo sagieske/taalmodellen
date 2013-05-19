@@ -1,10 +1,40 @@
+"""
+EDIT (by Eszter): Gonna add comments to understand the code
+	- run: python taalmodellen4.py training.pos test.pos bla.pos
+	- started running at ~16:35 -> 17:10 still running -> 17:45 finished :
+eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py training.pos test.pos bla.pos
+![Smoothing enabled]
+![Writing output to bla.pos]
+** Loading train corpus
+** Loading test corpus
+** Calculating unigram
+** Calculating language model
+** Calculating task model (This may take a while)
+*** Processing 42916 sentences
+** Smooth language model
+** Smooth task model
+** Calculate special bigram
+** Start Tagging
+-----------------------
+Total words: 49443
+Total words tagged: 48103
+Precision: 88.894664%
+Recall: 86.485448%
+
+"""
+
 import sys
 import math
 import re
 import itertools
 from operator import itemgetter
 
+
 def main(args):
+	"""
+	Program entry point
+	Arguments: training corpus, test corpus, output file, options
+	"""
 	debug = "--debug" in args
 	short =  "--short" in args
 	smooth = "--no-smoothing" not in args
@@ -72,6 +102,9 @@ def main(args):
 		print 'Recall: %f%%' % (recall*100)
 
 def outputTaggedSentence(seq, tags, outputFile):
+	"""
+	Write tagged sequences to the output file
+	"""
 	for s in range(len(seq)-2):
 		word = seq[s]
 		tag = tags[s]
