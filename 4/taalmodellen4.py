@@ -1,6 +1,6 @@
 """
 EDIT (by Eszter): Gonna add comments to understand the code
-	- run: python taalmodellen4.py training.pos test.pos bla.pos
+	- run: python taalmodellen4.py training.pos test.pos bla.pos (options)
 	- started running at ~16:35 -> 17:10 still running -> 17:45 finished:
 	
 eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py training.pos test.pos bla.pos
@@ -53,19 +53,27 @@ def main(args):
 	print '![Writing output to %s]' % outputFileName
 	outputFile = open(outputFileName,'w')
 
-	# Load train corpus
+	# Load training corpus
 	print '** Loading train corpus'
 	(trainWords, trainTags) = loadFile(args[1], False)
+	
+	# Load test corpus
 	print '** Loading test corpus'
 	(testWords, testTags) = loadFile(args[2], short)
 	
-	
+	# Calculate unigrams of training words
 	print '** Calculating unigram'
 	unigram = calculateNgram(trainWords, 1)
+	
+	# Calculate trigrams of training POS tags
 	print '** Calculating language model'
-	languageModel = calculateNgram(trainTags, 3) # 2nd-order Markov Model
+	languageModel = calculateNgram(trainTags, 3) 
+	
+	# Calculate the model for words and tags
 	print '** Calculating task model (This may take a while)'
 	( taskModel, tagStats, wordTags) = calculateTaskModel(trainWords, trainTags, unigram)
+	
+	# If smoothing is enabled, smooth probabilities
 	if smooth:
 		print '** Smooth language model'
 		(rvalues, sLanguageModel) = smoothGTk(languageModel, 4)
@@ -78,6 +86,8 @@ def main(args):
 		sTaskModel = taskModel
 		sBigram = calculateNgram(trainTags, 2)
 	
+	# Calculate the most probable POS tag for every word within the test corpus
+	# using the Viterbi algorithm and the calculated language and taks models
 	print '** Start Tagging'
 	total = 0
 	correct = 0
@@ -105,6 +115,8 @@ def main(args):
 def outputTaggedSentence(seq, tags, outputFile):
 	"""
 	Write tagged sequences to the output file
+	Parameters: sequence, tags, output file name
+	Output: words with their tags
 	"""
 	for s in range(len(seq)-2):
 		word = seq[s]
@@ -229,6 +241,9 @@ def calculateNgram(sentences,n):
 	return dict
 
 def calculateTaskModel(wordsequences, tagsequences, unigram):
+	"""
+	Calculate probabilities for words and their tags
+	"""
 	tagStats = {}
 	wordTags = {}
 	taskmodel = {}
@@ -403,6 +418,9 @@ def smoothGT(ngram):
 	return (rvalues,sNgram)
 
 def smoothTask(taskmodel, tagStats):
+	"""
+	Smooth the taks model
+	"""
 	sTaskModel = {}
 	for (word, tag) in taskmodel:
 		if taskmodel[(word, tag)] == 0:
