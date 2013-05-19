@@ -1,7 +1,8 @@
 """
 EDIT (by Eszter): Gonna add comments to understand the code
 	- run: python taalmodellen4.py training.pos test.pos bla.pos
-	- started running at ~16:35 -> 17:10 still running -> 17:45 finished :
+	- started running at ~16:35 -> 17:10 still running -> 17:45 finished:
+	
 eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py training.pos test.pos bla.pos
 ![Smoothing enabled]
 ![Writing output to bla.pos]
@@ -62,7 +63,7 @@ def main(args):
 	print '** Calculating unigram'
 	unigram = calculateNgram(trainWords, 1)
 	print '** Calculating language model'
-	languageModel = calculateNgram(trainTags, 3)
+	languageModel = calculateNgram(trainTags, 3) # 2nd-order Markov Model
 	print '** Calculating task model (This may take a while)'
 	( taskModel, tagStats, wordTags) = calculateTaskModel(trainWords, trainTags, unigram)
 	if smooth:
@@ -113,6 +114,10 @@ def outputTaggedSentence(seq, tags, outputFile):
 	outputFile.write("\n")
 
 def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug):
+	"""
+	Implementation of the Viterbi algorithm
+	Calculates emission and transition probabilities
+	"""
 	V = []
 	for w in range(len(seq)):
 		word = seq[w]
@@ -152,6 +157,9 @@ def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug):
 	return (prob, route)
 	
 def calculateOptimalRoute(V,transitions, location, debug):
+	"""
+	Calculate most probable route based on transition and emisson probabilities
+	"""
 	if location == -1:
 		return (1,["START"])
 	else:
@@ -170,6 +178,9 @@ def calculateOptimalRoute(V,transitions, location, debug):
 		return (prevProb*prob, trellis)
 		
 def calculateSpecialBiGram(ngram):
+	"""
+	Calculate bigrams for usage in 2nd-order Markov Model
+	"""
 	specialbigram = {}
 	for key in ngram:
 		if (key[0],key[1]) in specialbigram:
@@ -179,6 +190,9 @@ def calculateSpecialBiGram(ngram):
 	return specialbigram
 
 def calculateSpecialUniGram(ngram):
+	"""
+	!!! Not used in this program !!!
+	"""
 	specialunigram = {}
 	for key in ngram:
 		if key[0] in specialunigram:
@@ -188,6 +202,9 @@ def calculateSpecialUniGram(ngram):
 	return specialunigram
 
 def getMHighest(dict, m):
+	"""
+	!!! Not used in this program !!!
+	"""
 	freqs = []
 	total = 0
 	for (key,value) in sorted(dict.items(),key=itemgetter(1),reverse=True):
@@ -196,6 +213,9 @@ def getMHighest(dict, m):
 	return (freqs[:m],total)
 
 def calculateNgram(sentences,n):
+	"""
+	Create n grams
+	"""
 	dict = {}
 	for sentence in sentences:
 		sentence.reverse()
@@ -247,6 +267,9 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	return (taskmodel, tagStats, wordTags)
 
 def countTagInSequences(tag, sequences):
+	"""
+	Count appearences of a particular tag
+	"""
 	count = 0
 	for sequence in sequences:
 		for t in sequence:
@@ -255,6 +278,9 @@ def countTagInSequences(tag, sequences):
 	return count
 
 def countWordWithTagInSequences(word, tag, wordsequences, tagsequences):
+	"""
+	Count appearence of a particular word with a particular tag
+	"""
 	count = 0
 	for i in range(0, len(wordsequences)):
 		for j in range(0, len(wordsequences[i])):
@@ -263,10 +289,18 @@ def countWordWithTagInSequences(word, tag, wordsequences, tagsequences):
 	return count
 
 def createTuple(list,index,n):
+	"""
+	Create tuples and add start symbol
+	"""	
 	z = tuple(list[max(index-n+1,0):index+1])
 	return ('START',)*(n-len(z)) + z
 
 def getWordSequence(sentence):
+	"""
+	Get sequencies with start and stop symbols
+	Argument: corpus of sentences/paragraphs
+	Return: sequence array with start and stop symbols
+	"""
 	seq = []
 	if sentence != "":
 		seq.extend(sentence.split())
@@ -274,6 +308,9 @@ def getWordSequence(sentence):
 	return seq
 
 def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
+	"""
+	!!! Not used in this program !!!
+	"""
 	for sentence in sentences:
 		if sentence != "":
 			seq = sentence.split()
@@ -281,6 +318,9 @@ def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
 	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
 
 def calculateSentenceProbs(sentences, n, n_1gram, ngram, mode,zeroprob, log):
+	"""
+	!!! Not used in this program !!!
+	"""
 	for sentence in sentences:
 		if sentence != "":
 			seq = getWordSequence(sentence)
@@ -289,6 +329,9 @@ def calculateSentenceProbs(sentences, n, n_1gram, ngram, mode,zeroprob, log):
 
 
 def calculateSentenceProb(seq, n, n_1gram, ngram,mode,zeroprob, log):
+	"""
+	!!! Not used in this program !!!
+	"""
 	p = 0
 	if mode == "ml":
 		for i in range(len(seq)):
@@ -325,6 +368,9 @@ def calculateSentenceProb(seq, n, n_1gram, ngram,mode,zeroprob, log):
 	return math.exp(p)
 
 def getMostLikelyPermutation(seq, n, n_1gram, n_gram):
+	"""
+	!!! Not used in this program !!!
+	"""
 	maxP = 0.0
 	maxSeq = seq
 	for s in itertools.permutations(seq):
@@ -336,6 +382,9 @@ def getMostLikelyPermutation(seq, n, n_1gram, n_gram):
 
 
 def smoothGT(ngram):
+	"""
+	Good-Turing Smoothing
+	"""
 	sNgram = {}
 	ngram_values = ngram.values()
 	N = 24453025
@@ -366,6 +415,9 @@ def smoothTask(taskmodel, tagStats):
 	return sTaskModel
 
 def smoothGTk(ngram,k):
+	"""
+	Good-Turing Smoothing with k value
+	"""
 	sNgram = {}
 	ngram_values = ngram.values()
 	n1 = float(ngram_values.count(1))
@@ -391,11 +443,17 @@ def smoothGTk(ngram,k):
 	return (rvalues,sNgram)
 
 def loadFile(filename, short):
+	"""
+	Load file
+	"""
 	file = open(filename,'r')
 	buffer = file.read()
 	return parseWallStreet(buffer, short)
 
 def parseWallStreet(buffer, short):
+	"""
+	Parse module for the corpora
+	"""
 	tagsequences = []
 	wordsequences = []
 	tags = re.compile(r"(\S+)/(\w[a-zA-Z0-9\$]*) ")
