@@ -201,28 +201,7 @@ def calculateSpecialBiGram(ngram):
 			specialbigram[(key[0],key[1])] = ngram[key]
 	return specialbigram
 
-def calculateSpecialUniGram(ngram):
-	"""
-	!!! Not used in this program !!!
-	"""
-	specialunigram = {}
-	for key in ngram:
-		if key[0] in specialunigram:
-			specialunigram[key[0]] += ngram[key]
-		else:
-			specialunigram[key[0]] = ngram[key]
-	return specialunigram
 
-def getMHighest(dict, m):
-	"""
-	!!! Not used in this program !!!
-	"""
-	freqs = []
-	total = 0
-	for (key,value) in sorted(dict.items(),key=itemgetter(1),reverse=True):
-		total += value
-		freqs.append((key,value))
-	return (freqs[:m],total)
 
 def calculateNgram(sentences,n):
 	"""
@@ -230,7 +209,7 @@ def calculateNgram(sentences,n):
 	"""
 	dict = {}
 	for sentence in sentences:
-		sentence.reverse()
+		sentence.reverse() 
 		for i in range(0,len(sentence)):
 			t = createTuple(sentence, i, n)
 			if t in dict:
@@ -322,78 +301,7 @@ def getWordSequence(sentence):
 		seq.append('STOP')
 	return seq
 
-def calculateConditionalProbs(sentences, n,  n_1gram, ngram):
-	"""
-	!!! Not used in this program !!!
-	"""
-	for sentence in sentences:
-		if sentence != "":
-			seq = sentence.split()
-			p = float(ngram[createTuple(seq,len(seq)-1,n)]) / n_1gram[createTuple(seq, len(seq)-2, n-1)]
-	 		print "P(%s|%s) = %s " % ( seq[-1] , seq[:-1], p)
 
-def calculateSentenceProbs(sentences, n, n_1gram, ngram, mode,zeroprob, log):
-	"""
-	!!! Not used in this program !!!
-	"""
-	for sentence in sentences:
-		if sentence != "":
-			seq = getWordSequence(sentence)
-			p = calculateSentenceProb(seq, n, n_1gram, ngram,mode,zeroprob, log)
-			print "P(%s) = %s " % ( seq[:-1], p )
-
-
-def calculateSentenceProb(seq, n, n_1gram, ngram,mode,zeroprob, log):
-	"""
-	!!! Not used in this program !!!
-	"""
-	p = 0
-	if mode == "ml":
-		for i in range(len(seq)):
-			t1 = createTuple(seq,i,n)
-			t2 = createTuple(seq, i-1, n-1)
-			# in case of t1 is known
-			if(t1 in ngram):
-				if log:
-					p += math.log(float(ngram[t1]) / float(n_1gram[t2]))
-				else:
-					p += float(ngram[t1]) / float(n_1gram[t2])
-			else:
-				return 0
-	elif mode == "gt":
-		unistore = {}
-		for i in range(len(seq)):
-			t1 = createTuple(seq,i,n)
-			if(t1 in ngram):
-				if t1[0] in unistore:
-					p += unistore[t1[0]]
-				else:
-					unisum = 0
-					for key in n_1gram:
-						if key == t1[0]:
-							unisum += n_1gram[key]
-					if ngram[t1] > 0.0:
-						if log:
-							unistore[t1[0]] = math.log(float(ngram[t1]) / unisum)
-						else:
-							unistore[t1[0]] = float(ngram[t1]) / unisum
-						p += unistore[t1[0]]
-			else:
-				p += zeroprob
-	return math.exp(p)
-
-def getMostLikelyPermutation(seq, n, n_1gram, n_gram):
-	"""
-	!!! Not used in this program !!!
-	"""
-	maxP = 0.0
-	maxSeq = seq
-	for s in itertools.permutations(seq):
-		p = calculateSentenceProb(s, n, n_1gram, n_gram, 0, false)
-		if p > maxP:
-			maxP = p
-			maxSeq = s
-	return maxSeq
 
 
 def smoothGT(ngram):
