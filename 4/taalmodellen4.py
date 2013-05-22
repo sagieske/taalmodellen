@@ -3,15 +3,16 @@ EDIT (by Eszter): Gonna add comments to understand the code
 	- run: python taalmodellen4.py training.pos test.pos bla.pos (options)
 	- started running at ~16:35 -> 17:10 still running -> 17:45 finished:
 	
-eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py training.pos test.pos bla.pos
-![Smoothing enabled]
-![Writing output to bla.pos]
+sharon@sharon-Aspire-5749 ~/Documents/uva/taalmodellen/taalmodellen/4 $ python taalmodellen4.py training.pos test.pos bla.pos
+> Smoothing enabled
+> Write output to bla.pos
 ** Loading train corpus
 ** Loading test corpus
 ** Calculating unigram
 ** Calculating language model
-** Calculating task model (This may take a while)
+** Calculating task model
 *** Processing 42916 sentences
+DONE
 ** Smooth language model
 ** Smooth task model
 ** Calculate special bigram
@@ -19,8 +20,9 @@ eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py tra
 -----------------------
 Total words: 49443
 Total words tagged: 48103
-Precision: 88.894664%
-Recall: 86.485448%
+Precision: 80.342182%
+Recall: 78.164755%
+
 
 """
 
@@ -29,6 +31,7 @@ import math
 import re
 import itertools
 from operator import itemgetter
+import time
 
 
 def main(args):
@@ -36,18 +39,20 @@ def main(args):
 	Program entry point
 	Arguments: training corpus, test corpus, output file, options
 	"""
+	begin = time.time()
+
 	short =  "--short" in args
 	smooth = "--no-smoothing" not in args
 
 	if short:
-		print '![Only short sentences]'
+		print '> Short sentences only (< 15 words)'
 	if smooth:
-		print '![Smoothing enabled]'
+		print '> Smoothing enabled'
 	else:
-		print '![Smoothing disabled]'
+		print '> Smoothing disabled'
 	
 	outputFileName = args[3]
-	print '![Writing output to %s]' % outputFileName
+	print '> Write output to %s' % outputFileName
 	outputFile = open(outputFileName,'w')
 
 	# Load training corpus
@@ -67,7 +72,7 @@ def main(args):
 	languageModel = create_ngrams(trainTags, 3) 
 	
 	# Calculate the model for words and tags
-	print '** Calculating task model (This may take a while)'
+	print '** Calculating task model'
 	( taskModel, tagStats, wordTags) = calculateTaskModel(trainWords, trainTags, unigram)
 	
 	# If smoothing is enabled, smooth probabilities
@@ -100,6 +105,7 @@ def main(args):
 			if tags[t] == testTags[s][t-1]:
 				correct += 1
 	outputFile.close()
+	# Print statistics
 	if total > 0:
 		recall = float(correct)/total
 		precision = float(correct)/(total-unknown)
@@ -108,6 +114,10 @@ def main(args):
 		print 'Total words tagged: %d' % (total-unknown)
 		print 'Precision: %f%%' % (precision*100)
 		print 'Recall: %f%%' % (recall*100)
+	
+	# Print time
+	end = time.time() - begin
+	print 'Time taken: %d min and %d sec' % (end/60, end%60)
 
 def outputTaggedSentence(seq, tags, outputFile):
 	"""
@@ -128,19 +138,23 @@ def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags):
 	Calculates emission and transition probabilities
 	"""
 	V = []
+	# Calculate emmission probabilities
 	for w in range(len(seq)):
 		word = seq[w]
 		emissions = {}
 		if word == "STOP":
 			emissions['STOP'] = 1
 		else:
+			# unknown word
 			if word not in wordTags:
 				emissions['UNKNOWN'] = 1
+			# emission probability according to taskmodel
 			else:
 				for tag in wordTags[word]:
 					emissions[tag] = sTaskModel[(word, tag)]
 		V.append(emissions)
 	
+	# Calculate transition probabilities
 	transitions = {}
 	for i in range(len(V)-1):
 		for e1 in V[i]:
@@ -150,9 +164,11 @@ def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags):
 				for e2 in V[i-1]:
 					for e3 in V[i+1]:
 						try:	
+							# trigram probability according to language model
 							transitions[(e2,e1)] = sLanguageModel[(e3,e1,e2)]/sBigram[(e1,e2)]
 						except KeyError:
 							transitions[(e2,e1)] = 0
+	# Calculate route
 	(prob, route) = calculateOptimalRoute(V, transitions, len(seq)-2)
 	return (prob, route)
 	
@@ -160,12 +176,17 @@ def calculateOptimalRoute(V,transitions, location):
 	"""
 	Calculate most probable route based on transition and emisson probabilities
 	"""
+	# Back to start location
 	if location == -1:
 		return (1,["START"])
+	# Recursion
 	else:
+		# Get probability previous state
 		(prevProb, trellis) = calculateOptimalRoute(V, transitions, location-1)
+		# Get maximal probability current state
 		try:
 			(prob, tag) = max([(transitions[(trellis[len(trellis)-1],tag)] * V[location][tag], tag) for tag in V[location]])
+		# Unknown tag set prob 1
 		except Exception:
 			prob = 1
 			tag = "UNKNOWN"
@@ -211,8 +232,6 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	taskmodel = {}
 	# Create tag ngrams
 	tagUnigram = create_ngrams(tagsequences, 1)
-	# TODO: IS DIT NODIG? WORDT NIET GEBRUIKT TOCH?
-	aStore = {}
 	wordseqlen = len(wordsequences)
 	print "*** Processing %d sentences" % wordseqlen
 	for i in range(0, wordseqlen):
@@ -230,32 +249,26 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 
 			# Task Model
 			if (word, tag) not in taskmodel:
-				# is aStore niet altijd leeg??
-				if (word, tag) in aStore:
-					print "aSTORE!"
-					a = aStore[(word, tag)]
-				else:
-					# Single occurance of word (singelton words)
-					if unigram[(word,)] == 1:
-						if tag in tagStats:
-							(singleton, total) = tagStats[tag]
-							tagStats[tag] = (singleton+1, total+1)
-						# add tag to tagStats
-						else:
-							tagStats[tag] = (1,1)
-					# Word occurance of more than 1
+				# Single occurance of word (singelton words)
+				if unigram[(word,)] == 1:
+					if tag in tagStats:
+						(singleton, total) = tagStats[tag]
+						tagStats[tag] = (singleton+1, total+1)
+					# add tag to tagStats
 					else:
-						if tag in tagStats:
-							(singleton, total) = tagStats[tag]
-							tagStats[tag] = (singleton, total+1)
-						else:
-							tagStats[tag] = (0,1)
+						tagStats[tag] = (1,1)
+				# Word occurance of more than 1
+				else:
+					if tag in tagStats:
+						(singleton, total) = tagStats[tag]
+						tagStats[tag] = (singleton, total+1)
+					else:
+						tagStats[tag] = (0,1)
 
 				# Calculate probability of word/tag for taskmodel
 					a = countWordWithTagInSequences(word,tag,wordsequences, tagsequences)
 				b = tagUnigram[(tag,)]
 				taskmodel[(word, tag)] = float(a) / b
-	print "DONE"
 	return (taskmodel, tagStats, wordTags)
 
 def countTagInSequences(tag, sequences):
@@ -330,7 +343,7 @@ def smoothGTk(ngram,k):
 	# calculation of constant number of events
 	n1 = float(values.count(1))
 	# TODO: eventsize = 24453025 -> delete
-	eventsize = 24453025
+	eventsize = len(ngram) * len(ngram)
 	n0 = eventsize - len(ngram)	
 	nk_1 = float(values.count(k+1))
 	denom = (((k+1)*nk_1)/n1)
@@ -388,7 +401,6 @@ def parseWallStreet(buffer, short):
 			# Add end of sequence signs
 			if wordsequence != []:
 				if not short or len(wordsequence) < 16:
-					# TODO: Why double stops?
 					wordsequence.append('STOP')
 					#wordsequence.append('STOP')
 					#tagsequence.append('STOP')
