@@ -212,7 +212,7 @@ def create_ngrams(sentences,n):
 	for sentence in sentences:
 		sentence.reverse() 
 		for i in range(0,len(sentence)):
-			t = createTuple(seq, i, n)
+			t = createTuple(sentence, i, n)
 			dict[t] = dict.get(t,0) +1
 		sentence.reverse()
 	return dict
@@ -226,7 +226,9 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	tagStats = {}
 	wordTags = {}
 	taskmodel = {}
+	# Create tag ngrams
 	tagUnigram = create_ngrams(tagsequences, 1)
+	# TODO: IS DIT NODIG? WORDT NIET GEBRUIKT TOCH?
 	aStore = {}
 	wordseqlen = len(wordsequences)
 	print "*** Processing %d sentences" % wordseqlen
@@ -245,9 +247,12 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 
 			# Task Model
 			if (word, tag) not in taskmodel:
+				# is aStore niet altijd leeg??
 				if (word, tag) in aStore:
+					print "aSTORE!"
 					a = aStore[(word, tag)]
 				else:
+					# Single occurance of word (singelton words)
 					if unigram[(word,)] == 1:
 						if tag in tagStats:
 							(singleton, total) = tagStats[tag]
@@ -255,15 +260,19 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 						# add tag to tagStats
 						else:
 							tagStats[tag] = (1,1)
+					# Word occurance of more than 1
 					else:
 						if tag in tagStats:
 							(singleton, total) = tagStats[tag]
 							tagStats[tag] = (singleton, total+1)
 						else:
 							tagStats[tag] = (0,1)
+
+				# Calculate probability of word/tag for taskmodel
 					a = countWordWithTagInSequences(word,tag,wordsequences, tagsequences)
 				b = tagUnigram[(tag,)]
 				taskmodel[(word, tag)] = float(a) / b
+	print "DONE"
 	return (taskmodel, tagStats, wordTags)
 
 def countTagInSequences(tag, sequences):
@@ -309,28 +318,6 @@ def getWordSequence(sentence):
 		seq.append('STOP')
 	return seq
 
-
-# VOLGENS MIJ WORDT DIT NIET GEBRUIKT..
-def smoothGT(ngram):
-	"""
-	Good-Turing Smoothing
-	"""
-	sNgram = {}
-	ngram_values = ngram.values()
-	N = 24453025
-	n0 = N - len(ngram)
-	rvalues = {}
-	for t in ngram:
-		r = ngram[t]
-		if r in rvalues:
-			sNgram[t] = rvalues[r]
-		else:
-			if r > 0:
-				rvalues[r] = (r+1)*(float(ngram_values.count(r+1))/ngram_values.count(r))
-			else:
-				rvalues[r] = (r+1)*(float(ngram_values.count(r+1))/n0)
-			sNgram[t] = rvalues[r]
-	return (rvalues,sNgram)
 
 def smoothTask(taskmodel, tagStats):
 	"""
