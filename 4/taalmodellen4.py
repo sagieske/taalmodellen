@@ -205,19 +205,19 @@ def calculateSpecialBiGram(ngram):
 
 def calculateNgram(sentences,n):
 	"""
-	Create n grams
+	Create ngrams (adjusted from taalmodellen3v2.py)
+
 	"""
 	dict = {}
 	for sentence in sentences:
 		sentence.reverse() 
 		for i in range(0,len(sentence)):
-			t = createTuple(sentence, i, n)
-			if t in dict:
-				dict[t] += 1
-			else:
-				dict[t] = 1
+			t = createTuple(seq, i, n)
+			dict[t] = dict.get(t,0) +1
 		sentence.reverse()
 	return dict
+
+
 
 def calculateTaskModel(wordsequences, tagsequences, unigram):
 	"""
@@ -232,13 +232,18 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	print "*** Processing %d sentences" % wordseqlen
 	for i in range(0, wordseqlen):
 		for j in range(0, len(wordsequences[i])):
+			# Get word and tag
 			word = wordsequences[i][j]
 			tag = tagsequences[i][j]
+			# Add possible tag to corresponding word
 			if word in wordTags:
 				if tag not in wordTags[word]:
 					wordTags[word].append(tag)
+			# Add word + tag to list			
 			else:
 				wordTags[word] = [tag]
+
+			# Task Model
 			if (word, tag) not in taskmodel:
 				if (word, tag) in aStore:
 					a = aStore[(word, tag)]
@@ -247,6 +252,7 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 						if tag in tagStats:
 							(singleton, total) = tagStats[tag]
 							tagStats[tag] = (singleton+1, total+1)
+						# add tag to tagStats
 						else:
 							tagStats[tag] = (1,1)
 					else:
