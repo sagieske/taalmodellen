@@ -1,20 +1,31 @@
-\documentclass[11pt, a4paper]{article}
+\documentclass[10pt, a4paper]{article}
 
 \usepackage{fullpage}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{algorithm2e}
+\usepackage{mathtools}
 
 
 % Note by Eszter: Ik lul maar wat...fucking taalmodellen
+% Note 2: Het structuur van de paper is nog niet echt goed, maar dat komt tijdens het schrijven
 
+% On another note: 
+%   - uitleg van calculateNgram?
+%   - uitleg van parseWallstreet?
 
-\title{Final Paper: Language models BSc AI 2013}
+\title{Final Paper: Language models BSc AI 2013 \\ Assignment 4}
 \author{Eszter Fodor, Sharon Gieske \\ (5873320, 6167667)}
 \date{\today}
 
 \begin{document}
 \maketitle{}
 
-\abstract{This paper discribes our implementation of a Markov POS tagger, trained and tested on
-various sections of the Wall Street Journal corpus. We will describe the research question
+\abstract{This paper discribes our implementation of a probabilistic Markov POS tagger, trained and tested on
+various sections of the Wall Street Journal. We will describe the research question
 that we wanted to answer, how we approached the problem and what our results were.  }
 
 \section*{Introduction}
@@ -22,18 +33,125 @@ The problem that needed to be solved during the four assignments was how to calc
 probable Part-Of-Speach (POS) tag sequence using tagging and smoothing on a training corpus. The
 program that needed to be written would eventually be able to tag the test corpus with POS tags.
 
-Some POS-tag sequences are less possible than others which information can be used to analyze 
+Some POS-tag sequences are less possible than others, this information can be used to analyze 
 texts to learn whether it is grammatically correct or not.
 Another importance of POS-tagging is to disambiguate words within a sentence. This can be done by
 taking the previous words and their POS-tags into account. A program that is able to tag sentences
 accurately can be used on various corpora to learn what kind of sentences it consists of. 
 
 \section*{Approach}
+This section describes the steps that were taken to construct a working program that is able to POS-tag a corpus as accurately as possible.
+
+
+\subsection*{Basics}
+There are various models which form the base of a working POS-tagger. These models need to be implemented in order to successfully build a tagger. The implementation of these models was the objective of the first three assignments of the course Natural Language Models. A small portion of the functions within the implemented programs were not used to construct the tagger and will therefore not be discussed in this paper.
+
+The remainging implemented functions, such as constructing \textit{ngrams}, implementation of \textit{Good-Turing smoothing}, implementation of the \textit{Viterbi algorithm} will be discussed further along.
+
+\subsection*{Training}
+Sections 2 to 21 from the Wall Street Journal formed the training corpus for this project. Every word in this corpus has been previously POS-tagged, taking the context within the sentence into account. These words, along with their tags, were loaded as tuples in the form of $(word, tag)$ into the program to be used later on. Besides the tuples for word-tag pairs, a dictionary with unigrams of every word in the corpus along with their frequencies is created. Furthermore, trigrams are created from all the POS-tag sequences within the corpus along with their frequencies, which forms a so called \textit{language model}. 
+
+Another model that needed to be implemented is the so called \textit{lexical model}, which is named \textit{task model} in the code to prevent confusion while programming. This model depends on the the words and the tags that occur in the corpus and on the dictionary with POS-tag unigrams mentioned above. Using these three acquired data the lexical model is created by calculating the probability of the word-tag pair. This probability is gained by counting the occurances of the tag given by that word divided by the total occurances of this tag. Furthermore, the possibilities found for POS-tags for a word are being kept as well as the total occurances of POS-tags.
+
+When running the program smoothing is by default enabled which means that the two models are smoothed, though both in different ways. The \textit{language model} is smoothed using Good-Turing smoothing with Kats Backoff with $k = 4$. In the case of the lexical model, only events with frequencies of $0$ and $1$ are smoothed using the formulas:\\
+
+\centerline{$0^* = \frac{1}{2} \cdot \frac{n_1 (t)}{n_0}$ and $1^* = \frac{1}{2}$}\\\
+
+The tagger is trained, using all of the above, by calculating the probabilities for the POS-tag sequences. Unfortunatly the training takes a relatively long time because the calculations for the lexical model take much data into account and it takes time to process it all, especially with a corpus that is as big as the sections of the Wall Street Journal.
+
+\subsection*{Tagging}
+The next step, after the training of the tagger is tagging of the test corpus. This corpus consists of the sentences from section 23 of the Wall Street Journal. The tagging of this corpus is done by using the \textit{Viterbi algorithm}. This algorithm uses \textit{emission probabilities} and \textit{transition probabilities} to calculate the most probable tag sequencies. 
+
+Emission probabilty the probability of a word, given the current state (the POS-tag in this case). This probability is calculated by applying the lexical model to every word and their tags. Transition probability is the probability of a state given the previous states and in this case the probability of a POS-tag, given the previous two POS-tags within the sentence.
+
+After calculating these probabilities, the most probable route between states is calculated by recursively calculating the most probable transition between states. How the algorithm works is demonstrated below:\\
+
+
+\begin{algorithm}[H]
+\caption{Viterbi algorithm}
+\SetAlgoLined
+\textbf{Input:} sentence: sentence to be tagged\\
+\textbf{Input:} langugageModel: second-order Markov model of POS-tags\\
+\textbf{Input:} bigran: first-order Markov model of POS-tags\\
+\textbf{Input:} taskModel: lexical model\\
+\textbf{Input:} wordTags: mapping from word $\rightarrow$ tags\\
+V $\leftarrow \emptyset$\\
+\ForAll{word $\in$ setence}{emission $\leftarrow \emptyset$\\
+\ForAll{tag $\in$ wordTags}{emission(tag) $\rightarrow$ taskModel(word, tag)}
+V $\leftarrow$ V $\cup$ emission}
+transition $\leftarrow \emptyset$\\
+\For{i $\leftarrow 1 \rightarrow \|V\|$ KLOPT DIT?}{
+\ForAll{e $\in V_i$}{
+\ForAll{f $\in V_{i-1}$}{
+\ForAll{g $\in V_{i+1}$}{
+\eIf{$\langle e, f, g \rangle \in langugageModel \land \langle e, f \rangle \in bigram$}{
+transition(f, e) $\rightarrow \frac{languageModel(e, f, g)}{bigram(\langle e, f \rangle)}$}
+{$transitions(f, e) \rightarrow 0$ }}}}}
+\Return{calculateOptimalRoute(V, transition, $\|sentence\|$)}
+\end{algorithm}
+
+
+\begin{algorithm}[H]
+\caption{calculateOptimalRoute}
+\textbf{Input:} V: a state trellis of a HMM\\
+\textbf{Input:} transition: transition probabilities of a HMM\\
+\textbf{Input:} i: current position in trellis\\
+\eIf{$location == -1$}{return(1, START)}{
+$\langle prob_prev, path_prev \rangle$ $\leftarrow calculateOptimalRoute(V, transitions, i-1$\\
+$\langle prob, tag \rangle$ $\leftarrow argmax(prob = transition(path_prev(i-1), tag | tag \in V_i$)}
+\Return{$prob_prev \cdot path \cup tag$}
+
+
+\end{algorithm}
+
+\subsection*{Testing}
 
 
 
 \section*{Results}
-
+Smoothing enabled:
+\begin{verbatim}
+sharon@sharon-Aspire-5749 ~/Documents/uva/taalmodellen/taalmodellen/4 $ python 
+taalmodellen4.py training.pos test.pos bla.pos
+> Smoothing enabled
+> Write output to bla.pos
+** Loading train corpus
+** Loading test corpus
+** Calculating unigram
+** Calculating language model
+** Calculating task model
+*** Processing 42916 sentences
+** Smooth language model
+** Smooth task model
+** Calculate special bigram
+** Start Tagging
+-----------------------
+Total words: 49443
+Total words tagged: 48103
+Precision: 80.342182\%
+Recall: 78.164755\%
+Time taken: 57 min and 3 sec
+\end{verbatim}
+Smoothing disabled:
+\begin{verbatim}
+eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py 
+training.pos test.pos nonSmoothTest.pos --no-smoothing
+> Smoothing disabled
+> Write output to nonSmoothTest.pos
+** Loading train corpus
+** Loading test corpus
+** Calculating unigram
+** Calculating language model
+** Calculating task model
+*** Processing 42916 sentences
+** Start Tagging
+-----------------------
+Total words: 47066
+Total words tagged: 45821
+Precision: 55.956876\%
+Recall: 54.476692\%
+Time taken: 40 min and 31 sec
+\end{verbatim}
 
 \section*{Conclusion/Discussion}
 
