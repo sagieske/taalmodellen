@@ -63,11 +63,11 @@ def main(args):
 	
 	# Calculate unigrams of training words
 	print '** Calculating unigram'
-	unigram = calculateNgram(trainWords, 1)
+	unigram = create_ngrams(trainWords, 1)
 	
 	# Calculate trigrams of training POS tags
 	print '** Calculating language model'
-	languageModel = calculateNgram(trainTags, 3) 
+	languageModel = create_ngrams(trainTags, 3) 
 	
 	# Calculate the model for words and tags
 	print '** Calculating task model (This may take a while)'
@@ -84,7 +84,7 @@ def main(args):
 	else:
 		sLanguageModel = languageModel
 		sTaskModel = taskModel
-		sBigram = calculateNgram(trainTags, 2)
+		sBigram = create_ngrams(trainTags, 2)
 	
 	# Calculate the most probable POS tag for every word within the test corpus
 	# using the Viterbi algorithm and the calculated language and taks models
@@ -203,7 +203,7 @@ def calculateSpecialBiGram(ngram):
 
 
 
-def calculateNgram(sentences,n):
+def create_ngrams(sentences,n):
 	"""
 	Create ngrams (adjusted from taalmodellen3v2.py)
 
@@ -226,7 +226,7 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	tagStats = {}
 	wordTags = {}
 	taskmodel = {}
-	tagUnigram = calculateNgram(tagsequences, 1)
+	tagUnigram = create_ngrams(tagsequences, 1)
 	aStore = {}
 	wordseqlen = len(wordsequences)
 	print "*** Processing %d sentences" % wordseqlen
