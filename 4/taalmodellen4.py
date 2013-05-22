@@ -36,12 +36,9 @@ def main(args):
 	Program entry point
 	Arguments: training corpus, test corpus, output file, options
 	"""
-	debug = "--debug" in args
 	short =  "--short" in args
 	smooth = "--no-smoothing" not in args
 
-	if debug:
-		print '![Debug mode on]'
 	if short:
 		print '![Only short sentences]'
 	if smooth:
@@ -94,7 +91,7 @@ def main(args):
 	unknown = 0
 	for s in range(len(testWords)):
 		seq = testWords[s]
-		(prob, tags) = viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug)
+		(prob, tags) = viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags)
 		outputTaggedSentence(seq, tags, outputFile)	
 		total += len(seq)-2
 		for t in range(1, len(tags)-1):
@@ -125,7 +122,7 @@ def outputTaggedSentence(seq, tags, outputFile):
 		outputFile.write(str)
 	outputFile.write("\n")
 
-def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug):
+def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags):
 	"""
 	Implementation of the Viterbi algorithm
 	Calculates emission and transition probabilities
@@ -155,35 +152,21 @@ def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug):
 						try:	
 							transitions[(e2,e1)] = sLanguageModel[(e3,e1,e2)]/sBigram[(e1,e2)]
 						except KeyError:
-							if debug:
-								print '----------------KeyError on 55-------------------'
-								print 'KeyError while calculating transition probability'
-								print 'transitions[(e2,e1)] : ','transitions[(%s,%s)]' % (e2,e1)
-								print 'sLanguageModel[(e3,e1,e2)] : ' ,'sLanguageModel[(%s,%s,%s)]' % (e3,e1,e2)
-								print 'sBigram[(e1,e2)] : ' ,'sBigram[(%s,%s)]' % (e1,e2)
-								print 'V:'
-								print V
-								print '-------------------------------------------------'
 							transitions[(e2,e1)] = 0
-	(prob, route) = calculateOptimalRoute(V, transitions, len(seq)-2, debug)
+	(prob, route) = calculateOptimalRoute(V, transitions, len(seq)-2)
 	return (prob, route)
 	
-def calculateOptimalRoute(V,transitions, location, debug):
+def calculateOptimalRoute(V,transitions, location):
 	"""
 	Calculate most probable route based on transition and emisson probabilities
 	"""
 	if location == -1:
 		return (1,["START"])
 	else:
-		(prevProb, trellis) = calculateOptimalRoute(V, transitions, location-1, debug)
+		(prevProb, trellis) = calculateOptimalRoute(V, transitions, location-1)
 		try:
 			(prob, tag) = max([(transitions[(trellis[len(trellis)-1],tag)] * V[location][tag], tag) for tag in V[location]])
 		except Exception:
-			if debug:
-				print '-------------Exception on 73-----------------'
-				print 'Exception while calculating optimal route'
-				print 'transitions[(trellis[len(trellis)-1],tag)] : ','transition[(%s, %s)]' % (trellis[len(trellis)-1],tag) 
-				print '---------------------------------------------'
 			prob = 1
 			tag = "UNKNOWN"
 		trellis.append(tag)
