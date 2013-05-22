@@ -29,6 +29,7 @@ import math
 import re
 import itertools
 from operator import itemgetter
+import time
 
 
 def main(args):
@@ -36,18 +37,20 @@ def main(args):
 	Program entry point
 	Arguments: training corpus, test corpus, output file, options
 	"""
+	begin = time.time()
+
 	short =  "--short" in args
 	smooth = "--no-smoothing" not in args
 
 	if short:
-		print '![Only short sentences]'
+		print '> Short sentences only (< 15 words)'
 	if smooth:
-		print '![Smoothing enabled]'
+		print '> Smoothing enabled'
 	else:
-		print '![Smoothing disabled]'
+		print '> Smoothing disabled'
 	
 	outputFileName = args[3]
-	print '![Writing output to %s]' % outputFileName
+	print '> Write output to %s' % outputFileName
 	outputFile = open(outputFileName,'w')
 
 	# Load training corpus
@@ -67,7 +70,7 @@ def main(args):
 	languageModel = create_ngrams(trainTags, 3) 
 	
 	# Calculate the model for words and tags
-	print '** Calculating task model (This may take a while)'
+	print '** Calculating task model'
 	( taskModel, tagStats, wordTags) = calculateTaskModel(trainWords, trainTags, unigram)
 	
 	# If smoothing is enabled, smooth probabilities
@@ -100,6 +103,7 @@ def main(args):
 			if tags[t] == testTags[s][t-1]:
 				correct += 1
 	outputFile.close()
+	# Print statistics
 	if total > 0:
 		recall = float(correct)/total
 		precision = float(correct)/(total-unknown)
@@ -108,6 +112,10 @@ def main(args):
 		print 'Total words tagged: %d' % (total-unknown)
 		print 'Precision: %f%%' % (precision*100)
 		print 'Recall: %f%%' % (recall*100)
+	
+	# Print time
+	end = time.time() - begin
+	print 'Time taken: %d min and %d sec' % (end/60, end%60)
 
 def outputTaggedSentence(seq, tags, outputFile):
 	"""
