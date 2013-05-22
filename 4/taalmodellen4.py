@@ -278,6 +278,7 @@ def countWordWithTagInSequences(word, tag, wordsequences, tagsequences):
 	count = 0
 	for i in range(0, len(wordsequences)):
 		for j in range(0, len(wordsequences[i])):
+			# Find word & tag in sequences
 			if wordsequences[i][j] == word and tagsequences[i][j] == tag:
 				count += 1
 	return count
@@ -294,6 +295,7 @@ def getWordSequence(sentence):
 	Get sequencies with start and stop symbols
 	Argument: corpus of sentences/paragraphs
 	Return: sequence array with start and stop symbols
+	(from taalmodellen3v2.py)
 	"""
 	seq = []
 	if sentence != "":
@@ -302,8 +304,7 @@ def getWordSequence(sentence):
 	return seq
 
 
-
-
+# VOLGENS MIJ WORDT DIT NIET GEBRUIKT..
 def smoothGT(ngram):
 	"""
 	Good-Turing Smoothing
@@ -330,6 +331,7 @@ def smoothTask(taskmodel, tagStats):
 	Smooth the taks model
 	"""
 	sTaskModel = {}
+	# Smooth occcurances taskmodel
 	for (word, tag) in taskmodel:
 		if taskmodel[(word, tag)] == 0:
 			(n1,N) = tagStats[tag]
