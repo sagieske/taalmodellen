@@ -380,21 +380,28 @@ def parseWallStreet(buffer, short):
 	"""
 	Parse module for the corpora
 	"""
+	# List for storing sequences
 	tagsequences = []
 	wordsequences = []
-	tags = re.compile(r"(\S+)/(\w[a-zA-Z0-9\$]*) ")
+	# Set regular expression object X/Y
+	pairs = re.compile(r"(\S+)/(\w[a-zA-Z0-9\$]*) ")
+	# Delete empty lines
 	filtered_buffer = re.sub(r"\n"," ",buffer)
+	# Split end of sentences (./. and =====etc)
 	paragraphs = filtered_buffer.split("======================================")
 	for p in paragraphs:
 		paragraph_parts = p.split("./.")
 		for p2 in paragraph_parts:
 			tagsequence = []
 			wordsequence = []
-			for (word,tag) in tags.findall(" "+p2+" "):
+			# Find and append all X/Y paris
+			for (word,tag) in pairs.findall(" "+p2+" "):
 				tagsequence.append(tag)
 				wordsequence.append(word)
+			# Add end of sequence signs
 			if wordsequence != []:
 				if not short or len(wordsequence) < 16:
+					# TODO: Why double stops?
 					wordsequence.append('STOP')
 					wordsequence.append('STOP')
 					tagsequence.append('STOP')
