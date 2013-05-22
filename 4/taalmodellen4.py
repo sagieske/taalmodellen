@@ -84,7 +84,7 @@ def main(args):
 		sBigram = create_ngrams(trainTags, 2)
 	
 	# Calculate the most probable POS tag for every word within the test corpus
-	# using the Viterbi algorithm and the calculated language and taks models
+	# using the Viterbi algorithm and the calculated language and task models
 	print '** Start Tagging'
 	total = 0
 	correct = 0
@@ -390,8 +390,8 @@ def parseWallStreet(buffer, short):
 				if not short or len(wordsequence) < 16:
 					# TODO: Why double stops?
 					wordsequence.append('STOP')
-					wordsequence.append('STOP')
-					tagsequence.append('STOP')
+					#wordsequence.append('STOP')
+					#tagsequence.append('STOP')
 					tagsequence.append('STOP')
 					tagsequences.append(tagsequence)
 					wordsequences.append(wordsequence)
