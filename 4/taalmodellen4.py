@@ -411,7 +411,7 @@ def parseWallStreet(buffer, short):
 		for p2 in paragraph_parts:
 			tagsequence = []
 			wordsequence = []
-			# Find and append all X/Y paris
+			# Find and append all X/Y pares
 			for (word,tag) in pairs.findall(" "+p2+" "):
 				tagsequence.append(tag)
 				wordsequence.append(word)
