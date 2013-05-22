@@ -396,7 +396,6 @@ def parseWallStreet(buffer, short):
 			# Add end of sequence signs
 			if wordsequence != []:
 				if not short or len(wordsequence) < 16:
-					# TODO: Why double stops?
 					wordsequence.append('STOP')
 					wordsequence.append('STOP')
 					tagsequence.append('STOP')
