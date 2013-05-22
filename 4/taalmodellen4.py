@@ -342,26 +342,35 @@ def smoothTask(taskmodel, tagStats):
 
 def smoothGTk(ngram,k):
 	"""
-	Good-Turing Smoothing with k value
+	Good-Turing Smoothing with k value (from taalmodellen3v2.py)
 	"""
+	# smoothed ngrams and rvalues
 	sNgram = {}
-	ngram_values = ngram.values()
-	n1 = float(ngram_values.count(1))
-	nK1 = ngram_values.count(k+1)
-	N = 24453025
-	n0 = N - len(ngram)
-	denom = (1-(((k+1)*nK1)/n1))
 	rvalues = {}
-	for r in range(max(ngram_values)+1):
-		nR1 = ngram_values.count(r+1)
+	values = ngram.values()
+
+	# calculation of constant number of events
+	n1 = float(values.count(1))
+	# TODO: eventsize = 24453025 -> delete
+	eventsize = 24453025
+	n0 = eventsize - len(ngram)	
+	nk_1 = float(values.count(k+1))
+	denom = (((k+1)*nk_1)/n1)
+	# for every frequency r seen until k
+
+	for r in range(max(values)+1):
+		nr_1 = float(values.count(r+1))
+		# use standard Good-Turing Smoothing if r=0
 		if r == 0:
 			rvalues[r] = n1/n0
 		elif r > k:
-			rvalues[r] = r
+			rvalues[r] = float(values.count(r))
 		else:
-			nR = ngram_values.count(r)
-			rvalues[r] = (((r+1)*(float(nR1)/nR))-(r*((k+1)*nK1)/n1))/denom
+			nr = float(values.count(r))
+			rvalues[r] = (((r+1)*(float(nr_1)/nr))-(r* denom))/ (1-denom)
 
+
+	# create new bigram model with smoothed frequencies
 	for t in ngram:
 		r = ngram[t]
 		sNgram[t] = rvalues[r]
