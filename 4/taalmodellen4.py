@@ -192,6 +192,7 @@ def calculateOptimalRoute(V,transitions, location, debug):
 def calculateSpecialBiGram(ngram):
 	"""
 	Calculate bigrams for usage in 2nd-order Markov Model
+	(Variation on calculateSpecialUnigram from taalmodellen3v2.py)		
 	"""
 	specialbigram = {}
 	for key in ngram:
@@ -206,7 +207,6 @@ def calculateSpecialBiGram(ngram):
 def create_ngrams(sentences,n):
 	"""
 	Create ngrams (adjusted from taalmodellen3v2.py)
-
 	"""
 	dict = {}
 	for sentence in sentences:
