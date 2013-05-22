@@ -36,12 +36,9 @@ def main(args):
 	Program entry point
 	Arguments: training corpus, test corpus, output file, options
 	"""
-	debug = "--debug" in args
 	short =  "--short" in args
 	smooth = "--no-smoothing" not in args
 
-	if debug:
-		print '![Debug mode on]'
 	if short:
 		print '![Only short sentences]'
 	if smooth:
@@ -94,7 +91,7 @@ def main(args):
 	unknown = 0
 	for s in range(len(testWords)):
 		seq = testWords[s]
-		(prob, tags) = viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug)
+		(prob, tags) = viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags)
 		outputTaggedSentence(seq, tags, outputFile)	
 		total += len(seq)-2
 		for t in range(1, len(tags)-1):
@@ -125,7 +122,7 @@ def outputTaggedSentence(seq, tags, outputFile):
 		outputFile.write(str)
 	outputFile.write("\n")
 
-def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug):
+def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags):
 	"""
 	Implementation of the Viterbi algorithm
 	Calculates emission and transition probabilities
@@ -155,35 +152,21 @@ def viterbi(seq, sLanguageModel, sBigram, sTaskModel, wordTags, debug):
 						try:	
 							transitions[(e2,e1)] = sLanguageModel[(e3,e1,e2)]/sBigram[(e1,e2)]
 						except KeyError:
-							if debug:
-								print '----------------KeyError on 55-------------------'
-								print 'KeyError while calculating transition probability'
-								print 'transitions[(e2,e1)] : ','transitions[(%s,%s)]' % (e2,e1)
-								print 'sLanguageModel[(e3,e1,e2)] : ' ,'sLanguageModel[(%s,%s,%s)]' % (e3,e1,e2)
-								print 'sBigram[(e1,e2)] : ' ,'sBigram[(%s,%s)]' % (e1,e2)
-								print 'V:'
-								print V
-								print '-------------------------------------------------'
 							transitions[(e2,e1)] = 0
-	(prob, route) = calculateOptimalRoute(V, transitions, len(seq)-2, debug)
+	(prob, route) = calculateOptimalRoute(V, transitions, len(seq)-2)
 	return (prob, route)
 	
-def calculateOptimalRoute(V,transitions, location, debug):
+def calculateOptimalRoute(V,transitions, location):
 	"""
 	Calculate most probable route based on transition and emisson probabilities
 	"""
 	if location == -1:
 		return (1,["START"])
 	else:
-		(prevProb, trellis) = calculateOptimalRoute(V, transitions, location-1, debug)
+		(prevProb, trellis) = calculateOptimalRoute(V, transitions, location-1)
 		try:
 			(prob, tag) = max([(transitions[(trellis[len(trellis)-1],tag)] * V[location][tag], tag) for tag in V[location]])
 		except Exception:
-			if debug:
-				print '-------------Exception on 73-----------------'
-				print 'Exception while calculating optimal route'
-				print 'transitions[(trellis[len(trellis)-1],tag)] : ','transition[(%s, %s)]' % (trellis[len(trellis)-1],tag) 
-				print '---------------------------------------------'
 			prob = 1
 			tag = "UNKNOWN"
 		trellis.append(tag)
@@ -212,7 +195,7 @@ def create_ngrams(sentences,n):
 	for sentence in sentences:
 		sentence.reverse() 
 		for i in range(0,len(sentence)):
-			t = createTuple(seq, i, n)
+			t = createTuple(sentence, i, n)
 			dict[t] = dict.get(t,0) +1
 		sentence.reverse()
 	return dict
@@ -226,7 +209,9 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	tagStats = {}
 	wordTags = {}
 	taskmodel = {}
+	# Create tag ngrams
 	tagUnigram = create_ngrams(tagsequences, 1)
+	# TODO: IS DIT NODIG? WORDT NIET GEBRUIKT TOCH?
 	aStore = {}
 	wordseqlen = len(wordsequences)
 	print "*** Processing %d sentences" % wordseqlen
@@ -245,9 +230,12 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 
 			# Task Model
 			if (word, tag) not in taskmodel:
+				# is aStore niet altijd leeg??
 				if (word, tag) in aStore:
+					print "aSTORE!"
 					a = aStore[(word, tag)]
 				else:
+					# Single occurance of word (singelton words)
 					if unigram[(word,)] == 1:
 						if tag in tagStats:
 							(singleton, total) = tagStats[tag]
@@ -255,15 +243,19 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 						# add tag to tagStats
 						else:
 							tagStats[tag] = (1,1)
+					# Word occurance of more than 1
 					else:
 						if tag in tagStats:
 							(singleton, total) = tagStats[tag]
 							tagStats[tag] = (singleton, total+1)
 						else:
 							tagStats[tag] = (0,1)
+
+				# Calculate probability of word/tag for taskmodel
 					a = countWordWithTagInSequences(word,tag,wordsequences, tagsequences)
 				b = tagUnigram[(tag,)]
 				taskmodel[(word, tag)] = float(a) / b
+	print "DONE"
 	return (taskmodel, tagStats, wordTags)
 
 def countTagInSequences(tag, sequences):
@@ -309,28 +301,6 @@ def getWordSequence(sentence):
 		seq.append('STOP')
 	return seq
 
-
-# VOLGENS MIJ WORDT DIT NIET GEBRUIKT..
-def smoothGT(ngram):
-	"""
-	Good-Turing Smoothing
-	"""
-	sNgram = {}
-	ngram_values = ngram.values()
-	N = 24453025
-	n0 = N - len(ngram)
-	rvalues = {}
-	for t in ngram:
-		r = ngram[t]
-		if r in rvalues:
-			sNgram[t] = rvalues[r]
-		else:
-			if r > 0:
-				rvalues[r] = (r+1)*(float(ngram_values.count(r+1))/ngram_values.count(r))
-			else:
-				rvalues[r] = (r+1)*(float(ngram_values.count(r+1))/n0)
-			sNgram[t] = rvalues[r]
-	return (rvalues,sNgram)
 
 def smoothTask(taskmodel, tagStats):
 	"""
