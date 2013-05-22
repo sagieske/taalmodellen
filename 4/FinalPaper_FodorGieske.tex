@@ -64,7 +64,9 @@ The next step, after the training of the tagger is tagging of the test corpus. T
 
 Emission probabilty the probability of a word, given the current state (the POS-tag in this case). This probability is calculated by applying the lexical model to every word and their tags. Transition probability is the probability of a state given the previous states and in this case the probability of a POS-tag, given the previous two POS-tags within the sentence.
 
-After calculating these probabilities, the most probable route between states is calculated by recursively calculating the most probable transition between states. How the algorithm works is demonstrated below:\\
+After calculating these probabilities, the most probable route between states is calculated by recursively calculating the most probable transition between states. How the algorithm works is demonstrated below by \textit{Algorithm 1} and \textit{Algorithm 2}.
+
+The words from the test corpus, along with their POS-tags that were calculated by the steps described above, are written in an output file. To check whether the tagged did a good job, the output file needs to be compared with the provided test corpus and the tags that were manually added to it. This step will be further discussed in section \textit{Testing}.
 
 
 \begin{algorithm}[H]
@@ -96,10 +98,10 @@ transition(f, e) $\rightarrow \frac{languageModel(e, f, g)}{bigram(\langle e, f 
 \textbf{Input:} V: a state trellis of a HMM\\
 \textbf{Input:} transition: transition probabilities of a HMM\\
 \textbf{Input:} i: current position in trellis\\
-\eIf{$location == -1$}{return(1, START)}{
+\eIf{$location == -1$}{\Return(1, START)}{
 $\langle prob_prev, path_prev \rangle$ $\leftarrow calculateOptimalRoute(V, transitions, i-1$\\
-$\langle prob, tag \rangle$ $\leftarrow argmax(prob = transition(path_prev(i-1), tag | tag \in V_i$)}
-\Return{$prob_prev \cdot path \cup tag$}
+$\langle prob, tag \rangle$ $\leftarrow argmax(prob = transition(path_prev(i-1), tag | tag \in V_i$)\\
+\Return{$\langle prob_prev \cdot path \cup tag \rangle$}}
 
 
 \end{algorithm}
