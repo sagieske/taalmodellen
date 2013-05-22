@@ -219,8 +219,6 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 	taskmodel = {}
 	# Create tag ngrams
 	tagUnigram = create_ngrams(tagsequences, 1)
-	# TODO: IS DIT NODIG? WORDT NIET GEBRUIKT TOCH?
-	aStore = {}
 	wordseqlen = len(wordsequences)
 	print "*** Processing %d sentences" % wordseqlen
 	for i in range(0, wordseqlen):
@@ -238,26 +236,21 @@ def calculateTaskModel(wordsequences, tagsequences, unigram):
 
 			# Task Model
 			if (word, tag) not in taskmodel:
-				# is aStore niet altijd leeg??
-				if (word, tag) in aStore:
-					print "aSTORE!"
-					a = aStore[(word, tag)]
-				else:
-					# Single occurance of word (singelton words)
-					if unigram[(word,)] == 1:
-						if tag in tagStats:
-							(singleton, total) = tagStats[tag]
-							tagStats[tag] = (singleton+1, total+1)
-						# add tag to tagStats
-						else:
-							tagStats[tag] = (1,1)
-					# Word occurance of more than 1
+				# Single occurance of word (singelton words)
+				if unigram[(word,)] == 1:
+					if tag in tagStats:
+						(singleton, total) = tagStats[tag]
+						tagStats[tag] = (singleton+1, total+1)
+					# add tag to tagStats
 					else:
-						if tag in tagStats:
-							(singleton, total) = tagStats[tag]
-							tagStats[tag] = (singleton, total+1)
-						else:
-							tagStats[tag] = (0,1)
+						tagStats[tag] = (1,1)
+				# Word occurance of more than 1
+				else:
+					if tag in tagStats:
+						(singleton, total) = tagStats[tag]
+						tagStats[tag] = (singleton, total+1)
+					else:
+						tagStats[tag] = (0,1)
 
 				# Calculate probability of word/tag for taskmodel
 					a = countWordWithTagInSequences(word,tag,wordsequences, tagsequences)
