@@ -25,8 +25,7 @@
 \maketitle{}
 
 \abstract{This paper discribes our implementation of a probabilistic Markov POS tagger, trained and tested on
-various sections of the Wall Street Journal. We will describe the research question
-that we wanted to answer, how we approached the problem and what our results were.  }
+various sections of the Wall Street Journal. The POS tagger is trained by creating a language and task model, trained with smoothing and without smoothing. The test corpus is tagged using the Viterbi algorithm. A POS tagger trained with smoothed models shows to have a good accuracy and recall. }
 
 \section*{Introduction}
 The problem that needed to be solved during the four assignments was how to calculate the most
@@ -66,7 +65,7 @@ Emission probabilty the probability of a word, given the current state (the POS-
 
 After calculating these probabilities, the most probable route between states is calculated by recursively calculating the most probable transition between states. How the algorithm works is demonstrated below by \textit{Algorithm 1} and \textit{Algorithm 2}.
 
-The words from the test corpus, along with their POS-tags that were calculated by the steps described above, are written in an output file. To check whether the tagged did a good job, the output file needs to be compared with the provided test corpus and the tags that were manually added to it. This step will be further discussed in section \textit{Testing}.
+The words from the test corpus, along with their POS-tags that were calculated by the steps described above, are written in an output file. To check whether the tagged did a good job, the output file needs to be compared with the provided test corpus and the tags that were manually added to it. Precision and recall are calculated to determine the quality of the POS tagger.
 
 
 \begin{algorithm}[H]
@@ -106,11 +105,16 @@ $\langle prob, tag \rangle$ $\leftarrow argmax(prob = transition(path_prev(i-1),
 
 \end{algorithm}
 
-\subsection*{Testing}
-
-
-
 \section*{Results}
+The following results are gained for POS tagging with and without smoothing respectively of the models in the algorithm. The following formulas are used for recall and precision calculation:
+\begin{equation}
+Recall(tagger) = \frac{(\text{number of words correctly tagged by tagger})}{\text{N}}\\
+\end{equation}
+\begin{equation}
+Precision(tagger) = \frac{(\text{number of words correctly tagged by tagger})}{(\text{number of words which were tagged by the tagger})}
+\end{equation}
+
+\\
 Smoothing enabled:
 \begin{verbatim}
 sharon@sharon-Aspire-5749 ~/Documents/uva/taalmodellen/taalmodellen/4 $ python 
@@ -156,8 +160,8 @@ Time taken: 40 min and 31 sec
 \end{verbatim}
 
 \section*{Conclusion/Discussion}
-
-
+A probabilistic Markov POS tagger combined with smoothing gives precision of 80 \% and a recall of 78 \%. The probabilistic Makrov POS tagger with smoothing is fit for POS tagging the sections in the Wall Street Journal. The probabilistic Markov POS tagger without smoothing gives a very bad result. The tagger has a precision of almost 56 \% and a recall of 54 \%, which means that only half of the POS tags are tagged correctly. \\
+Even though the POS tagger with smoothing gives a very good result on the test corpus, the POS tagger is not directly suitable for texts from other domains. The POS tagger is wholely trained on text obtained from the Wall Street Journal. Word-tag pairs are trained domain specific and it is not certain the POS tagger will perform as well on texts from other domains.
 
 
 
