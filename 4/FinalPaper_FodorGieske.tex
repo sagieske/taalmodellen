@@ -45,7 +45,20 @@ This section describes the steps that were taken to construct a working program 
 \subsection*{Basics}
 There are various models which form the base of a working POS-tagger. These models need to be implemented in order to successfully build a tagger. The implementation of these models was the objective of the first three assignments of the course Natural Language Models. A small portion of the functions within the implemented programs were not used to construct the tagger and will therefore not be discussed in this paper.
 
-The remainging implemented functions, such as constructing \textit{ngrams}, implementation of \textit{Good-Turing smoothing}, implementation of the \textit{Viterbi algorithm} will be discussed further along.
+The remaining implemented functions, such as constructing \textit{ngrams}, implementation of \textit{Good-Turing smoothing}, implementation of the \textit{Viterbi algorithm} will be discussed further along.
+
+\subsubsection*{N-grams}
+N-grams are sequences of n items from a sequence of text. N-grams are constructed using tuples of n items. A dictionary is created using these n-grams to obtain their frequency and is used for calculating sequence probabilities.
+
+\subsubsection*{Good-Turing smoothing}
+Good-Turing smoothing is a technique to predict the probability of occurances of items not seen in training. Good-Turing uses the count of things seen once to estimate the count of unseen items using the following equation:
+\begin{equation}
+r_0 = \frac{n_1}{n_0}, \text{ for }r = 0\\
+\end{equation}
+Combining Good-Turing smoothing with Katz-Backoff allows discounting over events occuring $1 \leq r \leq k$ times.
+\begin{equation}
+r^* = \frac{(r+1)\frac{n_{r+1}}{n_r}-r\frac{(k+1)n_{k+1}}{n_1}}{1-\frac{(k+1)n_{k+1}}{n_1}}, \text{ for } 1 \leq r \leq k
+\end{equation}
 
 \subsection*{Training}
 Sections 2 to 21 from the Wall Street Journal formed the training corpus for this project. Every word in this corpus has been previously POS-tagged, taking the context within the sentence into account. These words, along with their tags, were loaded as tuples in the form of $(word, tag)$ into the program to be used later on. Besides the tuples for word-tag pairs, a dictionary with unigrams of every word in the corpus along with their frequencies is created. Furthermore, trigrams are created from all the POS-tag sequences within the corpus along with their frequencies, which forms a so called \textit{language model}. 
@@ -63,25 +76,91 @@ The next step, after the training of the tagger is tagging of the test corpus. T
 
 Emission probabilty the probability of a word, given the current state (the POS-tag in this case). This probability is calculated by applying the lexical model to every word and their tags. Transition probability is the probability of a state given the previous states and in this case the probability of a POS-tag, given the previous two POS-tags within the sentence.
 
-After calculating these probabilities, the most probable route between states is calculated by recursively calculating the most probable transition between states. How the algorithm works is demonstrated below by \textit{Algorithm 1} and \textit{Algorithm 2}.
+After calculating these probabilities, the most probable route between states is calculated by recursively calculating the most probable transition between states. How the algorithm works is demonstrated in the appendix by \textit{Algorithm 2} and \textit{Algorithm 3}.
 
 The words from the test corpus, along with their POS-tags that were calculated by the steps described above, are written in an output file. To check whether the tagged did a good job, the output file needs to be compared with the provided test corpus and the tags that were manually added to it. Precision and recall are calculated to determine the quality of the POS tagger.
 
 
+\subsection*{Testing}
+The program can be run by:
+\begin{verbatim}
+$ python taalmodellen4.py training.pos test.pos output.pos
+\end{verbatim}
+
+With this command the program is fully run including smoothing, tagging and comparing the resulting tags to the tags in test corpus. The output that is created is an output file with the words from the test corpus and their tags and in the console the \textit{precision} and the \textit{recall} of the tagger is printed along with the time that it took the program to finish. The results of the program can be found in section \textit{Results}.
+
+\section*{Results}
+
+\noindent The results of the final program with smoothing enabled:
+\begin{verbatim}
+sharon@sharon-Aspire-5749 ~/Documents/uva/taalmodellen/taalmodellen/4 $ python 
+taalmodellen4.py training.pos test.pos output.pos
+> Smoothing enabled
+> Write output to bla.pos
+** Loading train corpus
+** Loading test corpus
+** Calculating unigram
+** Calculating language model
+** Calculating task model
+*** Processing 42916 sentences
+** Smooth language model
+** Smooth task model
+** Calculate special bigram
+** Start Tagging
+-----------------------
+Total words: 49443
+Total words tagged: 48103
+Precision: 80.342182%
+Recall: 78.164755%
+Time taken: 57 min and 3 sec
+\end{verbatim}
+
+\noindent The results of the final program with smoothing disabled:
+\begin{verbatim}
+eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py 
+training.pos test.pos nonSmoothTest.pos --no-smoothing
+> Smoothing disabled
+> Write output to nonSmoothTest.pos
+** Loading train corpus
+** Loading test corpus
+** Calculating unigram
+** Calculating language model
+** Calculating task model
+*** Processing 42916 sentences
+** Start Tagging
+-----------------------
+Total words: 47066
+Total words tagged: 45821
+Precision: 55.956876%
+Recall: 54.476692%
+Time taken: 40 min and 31 sec
+\end{verbatim}
+
+\section*{Conclusion/Discussion}
+There is a big difference between the precision and recall of the tagger when it is run with and without smoothing. As it can be read above, the precision of the tagger \textit{with} smoothing is 80\% and \textit{without} smoothing it is only 56\%. This enormous difference can be explained by the fact that POS-tags can occure with a very low frequency which makes it harder to calculate the highest probability for a sequence.
+
+Though this tagger is not perfectly accurate, it does a decent job. It could deffinetly use some tweaking if one wanted to use it for research purposes, but as of this project a precision and recall of around 80\% is satisfactory.
+
+The POS tagger with smoothing gives a very good result on the test corpus, but this does not mean the POS tagger is directly suitable for texts from other domains. The POS tagger is wholely trained on text obtained from the Wall Street Journal. Word-tag pairs are trained domain specific and it is not certain the POS tagger will perform as well on texts from other domains.
+
+\newpage
+\appendix{}
+\section{Algorithms}
+
+
 \begin{algorithm}[H]
 \caption{Viterbi algorithm}
-\SetAlgoLined
 \textbf{Input:} sentence: sentence to be tagged\\
 \textbf{Input:} langugageModel: second-order Markov model of POS-tags\\
 \textbf{Input:} bigran: first-order Markov model of POS-tags\\
 \textbf{Input:} taskModel: lexical model\\
 \textbf{Input:} wordTags: mapping from word $\rightarrow$ tags\\
 V $\leftarrow \emptyset$\\
-\ForAll{word $\in$ setence}{emission $\leftarrow \emptyset$\\
+\ForAll{word $\in$ sentence}{emission $\leftarrow \emptyset$\\
 \ForAll{tag $\in$ wordTags}{emission(tag) $\rightarrow$ taskModel(word, tag)}
 V $\leftarrow$ V $\cup$ emission}
 transition $\leftarrow \emptyset$\\
-\For{i $\leftarrow 1 \rightarrow \|V\|$ KLOPT DIT?}{
+\For{i $= 1 \rightarrow \|V\|$}{
 \ForAll{e $\in V_i$}{
 \ForAll{f $\in V_{i-1}$}{
 \ForAll{g $\in V_{i+1}$}{
@@ -101,69 +180,7 @@ transition(f, e) $\rightarrow \frac{languageModel(e, f, g)}{bigram(\langle e, f 
 $\langle prob_prev, path_prev \rangle$ $\leftarrow calculateOptimalRoute(V, transitions, i-1$\\
 $\langle prob, tag \rangle$ $\leftarrow argmax(prob = transition(path_prev(i-1), tag | tag \in V_i$)\\
 \Return{$\langle prob_prev \cdot path \cup tag \rangle$}}
-
-
 \end{algorithm}
-
-\section*{Results}
-The following results are gained for POS tagging with and without smoothing respectively of the models in the algorithm. The following formulas are used for recall and precision calculation:
-\begin{equation}
-Recall(tagger) = \frac{(\text{number of words correctly tagged by tagger})}{\text{N}}\\
-\end{equation}
-\begin{equation}
-Precision(tagger) = \frac{(\text{number of words correctly tagged by tagger})}{(\text{number of words which were tagged by the tagger})}
-\end{equation}
-
-\\
-Smoothing enabled:
-\begin{verbatim}
-sharon@sharon-Aspire-5749 ~/Documents/uva/taalmodellen/taalmodellen/4 $ python 
-taalmodellen4.py training.pos test.pos bla.pos
-> Smoothing enabled
-> Write output to bla.pos
-** Loading train corpus
-** Loading test corpus
-** Calculating unigram
-** Calculating language model
-** Calculating task model
-*** Processing 42916 sentences
-** Smooth language model
-** Smooth task model
-** Calculate special bigram
-** Start Tagging
------------------------
-Total words: 49443
-Total words tagged: 48103
-Precision: 80.342182\%
-Recall: 78.164755\%
-Time taken: 57 min and 3 sec
-\end{verbatim}
-Smoothing disabled:
-\begin{verbatim}
-eszter@eszter-laptop /media/DATA/AI/taalmodellen/4 $ python taalmodellen4.py 
-training.pos test.pos nonSmoothTest.pos --no-smoothing
-> Smoothing disabled
-> Write output to nonSmoothTest.pos
-** Loading train corpus
-** Loading test corpus
-** Calculating unigram
-** Calculating language model
-** Calculating task model
-*** Processing 42916 sentences
-** Start Tagging
------------------------
-Total words: 47066
-Total words tagged: 45821
-Precision: 55.956876\%
-Recall: 54.476692\%
-Time taken: 40 min and 31 sec
-\end{verbatim}
-
-\section*{Conclusion/Discussion}
-A probabilistic Markov POS tagger combined with smoothing gives precision of 80 \% and a recall of 78 \%. The probabilistic Makrov POS tagger with smoothing is fit for POS tagging the sections in the Wall Street Journal. The probabilistic Markov POS tagger without smoothing gives a very bad result. The tagger has a precision of almost 56 \% and a recall of 54 \%, which means that only half of the POS tags are tagged correctly. \\
-Even though the POS tagger with smoothing gives a very good result on the test corpus, the POS tagger is not directly suitable for texts from other domains. The POS tagger is wholely trained on text obtained from the Wall Street Journal. Word-tag pairs are trained domain specific and it is not certain the POS tagger will perform as well on texts from other domains.
-
-
 
 
 \end{document}
