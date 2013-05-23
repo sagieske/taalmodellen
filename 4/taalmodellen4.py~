@@ -324,8 +324,7 @@ def smoothTask(taskmodel, tagStats):
 	for (word, tag) in taskmodel:
 		if taskmodel[(word, tag)] == 0:
 			(n1,N) = tagStats[tag]
-			#sTaskModel[(word,tag)] = 0.5*(n1/N)
-			sTaskModel[(word,tag)] = 0.5*n1
+			sTaskModel[(word,tag)] = 0.5*(n1/N)
 		elif taskmodel[(word,tag)] == 1:
 			sTaskModel[(word,tag)] = 0.5
 		else:	
@@ -344,8 +343,7 @@ def smoothGTk(ngram,k):
 	# calculation of constant number of events
 	n1 = float(values.count(1))
 	eventsize = len(ngram) * len(ngram)
-	#n0 = eventsize - len(ngram)	
-	n0 = 1
+	n0 = eventsize - len(ngram)	
 	nk_1 = float(values.count(k+1))
 	denom = (((k+1)*nk_1)/n1)
 	# for every frequency r seen until k
